@@ -121,7 +121,6 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // НАСТРОЙКА ВОПРОСОВ (меняй текст и правильные ответы здесь)
         const quizData = [
             { q: "Какой у меня любимый цвет?", options: ["Синий", "Красный", "Черный", "Зеленый"], correct: 0 },
             { q: "Что я больше всего люблю есть?", options: ["Пиццу", "Суши", "Бургеры", "Пасту"], correct: 1 },
@@ -166,11 +165,10 @@
         }
 
         function showResult() {
-            const passed = score > 6;
             document.getElementById('app').innerHTML = `
                 <div class="finish-card">
-                    <div class="score-title">${passed ? '🎉 Победа!' : '🙈 Почти получилось!'}</div>
-                    <div class="score-desc">Ты ответила правильно на <b>${score}</b> из 10 вопросов.</div>
+                    <div class="score-title">🎉 Викторина завершена!</div>
+                    <div class="score-desc">Ты ответила правильно на <b>${score}</b> из ${quizData.length} вопросов.</div>
                     <button class="action-btn" onclick="sendData(${score})">Завершить</button>
                 </div>
             `;
@@ -178,6 +176,7 @@
 
         function sendData(finalScore) {
             tg.sendData(JSON.stringify({ score: finalScore }));
+            tg.close();
         }
 
         loadQuestion();
