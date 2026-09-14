@@ -8,7 +8,7 @@
     <style>
         :root {
             --bg-color: #0d060a;
-            --card-bg: rgba(26, 15, 22, 0.75);
+            --card-bg: rgba(26, 15, 22, 0.85);
             --accent: #e11d48;
             --text: #ffffff;
             --text-muted: #fda4af;
@@ -23,7 +23,7 @@
             padding: 16px;
             box-sizing: border-box;
             padding-bottom: 90px;
-            padding-top: 140px; /* Отступ сверху, чтобы логотип "Сакура" оставался видимым */
+            padding-top: 140px;
         }
 
         .categories {
@@ -74,6 +74,12 @@
             margin-bottom: 4px;
         }
 
+        .movie-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
         .movie-time {
             color: #f43f5e;
             font-weight: bold;
@@ -95,9 +101,7 @@
         .admin-footer {
             display: none;
             position: fixed;
-            bottom: 0;
-            left: 0; 
-            right: 0;
+            bottom: 0; left: 0; right: 0;
             background: rgba(13, 6, 10, 0.95);
             border-top: 1px solid var(--border);
             padding: 12px 16px;
@@ -117,6 +121,7 @@
             font-size: 14px;
         }
 
+        /* Модальные окна */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -136,6 +141,8 @@
             max-width: 400px;
             box-sizing: border-box;
             border: 1px solid var(--border);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         input, select {
@@ -149,6 +156,67 @@
             box-sizing: border-box;
             font-size: 14px;
         }
+
+        /* Схема зала */
+        .screen {
+            background: #e11d48;
+            height: 4px;
+            width: 80%;
+            margin: 10px auto 20px auto;
+            box-shadow: 0 0 15px #e11d48;
+            border-radius: 2px;
+        }
+        .screen-title {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .seats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .seat-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .row-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            width: 45px;
+        }
+
+        .seat {
+            width: 32px;
+            height: 32px;
+            background: #334155;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .seat.selected {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .seat.occupied {
+            background: #475569;
+            color: #94a3b8;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body>
@@ -157,10 +225,9 @@
 
     <div class="categories">
         <div class="cat-chip active" onclick="filterCat('all', this)">Все</div>
-        <div class="cat-chip" onclick="filterCat('horror', this)">👻 Ужасы</div>
         <div class="cat-chip" onclick="filterCat('films', this)">🎬 Фильмы</div>
-        <div class="cat-chip" onclick="filterCat('anime', this)">⛩ Аниме</div>
         <div class="cat-chip" onclick="filterCat('series', this)">📺 Сериалы</div>
+        <div class="cat-chip" onclick="filterCat('anime', this)">⛩ Аниме</div>
     </div>
 
     <div class="catalog-grid" id="movies-list"></div>
@@ -169,29 +236,50 @@
         <button class="admin-btn" onclick="openAdminModal()">⚙️ Панель администратора</button>
     </div>
 
+    <!-- Модальное окно Админки -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-body">
             <h3 style="margin-top:0;">Запланировать показ</h3>
             
-            <label>Название фильма / сериала:</label>
+            <label>Название:</label>
             <input type="text" id="m-title" placeholder="Например: Астрал 5">
 
-            <label>Жанр:</label>
-            <select id="m-genre">
-                <option value="horror">👻 Ужасы / Хоррор</option>
-                <option value="films">🎬 Фильм</option>
+            <label>Категория:</label>
+            <select id="m-category">
+                <option value="films">🎬 Фильмы</option>
+                <option value="series">📺 Сериалы</option>
                 <option value="anime">⛩ Аниме</option>
-                <option value="series">📺 Сериал</option>
             </select>
+
+            <label>Жанр:</label>
+            <input type="text" id="m-genre" placeholder="Например: Ужасы / Драма">
 
             <label>Время начала:</label>
             <input type="text" id="m-time" placeholder="Например: 20:00">
 
-            <label>День недели / Дата:</label>
-            <input type="text" id="m-day" placeholder="Сегодня / Завтра / Пятница">
+            <label>День / Дата:</label>
+            <input type="text" id="m-day" placeholder="Сегодня / Завтра">
 
-            <button class="btn" style="width:100%; padding:12px; margin-bottom:8px;" onclick="addMovie()">Запланировать показ</button>
+            <button class="btn" style="width:100%; padding:12px; margin-bottom:8px;" onclick="addMovie()">Добавить сеанс</button>
             <button class="btn" style="width:100%; padding:10px; background:#475569;" onclick="closeAdminModal()">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно Выбора места -->
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal-body">
+            <h3 id="book-title" style="margin-top:0; text-align:center;"></h3>
+            <div class="screen-title">ЭКРАН</div>
+            <div class="screen"></div>
+
+            <div class="seats-grid" id="seats-container"></div>
+
+            <div id="booking-info" style="text-align:center; font-size:13px; margin-bottom:15px; color:var(--text-muted);">
+                Выберите место на схеме
+            </div>
+
+            <button class="btn" style="width:100%; padding:12px; margin-bottom:8px;" onclick="confirmBooking()">Забронировать место</button>
+            <button class="btn" style="width:100%; padding:10px; background:#475569;" onclick="closeBookingModal()">Отмена</button>
         </div>
     </div>
 
@@ -201,7 +289,6 @@
         tg.expand();
 
         const ADMINS = ["siqhnn", "fuckvskrytiye", "polomad"];
-
         const user = tg.initDataUnsafe?.user;
         const currentUsername = (user?.username || "").toLowerCase();
 
@@ -210,24 +297,28 @@
         }
 
         let moviesData = [
-            { id: 1, title: "Астрал 5", genre: "horror", time: "18:00", day: "Сегодня" },
-            { id: 2, title: "Интерстеллар", genre: "films", time: "21:00", day: "Завтра" }
+            { id: 1, title: "Астрал 5", category: "films", genre: "Ужасы", time: "18:00", day: "Сегодня" },
+            { id: 2, title: "Атака Титанов", category: "anime", genre: "Боевик", time: "21:00", day: "Завтра" }
         ];
+
+        let selectedMovie = null;
+        let selectedSeat = null;
 
         function renderMovies(filter = 'all') {
             const list = document.getElementById('movies-list');
             list.innerHTML = '';
 
             moviesData.forEach(m => {
-                if (filter === 'all' || m.genre === filter) {
+                if (filter === 'all' || m.category === filter) {
                     const card = document.createElement('div');
                     card.className = 'movie-card';
                     card.innerHTML = `
                         <div>
                             <div class="movie-title">${m.title}</div>
+                            <div class="movie-meta">Жанр: ${m.genre}</div>
                             <div class="movie-time">⏰ ${m.day} в ${m.time}</div>
                         </div>
-                        <button class="btn" onclick="joinSession('${m.title}')">Смотреть</button>
+                        <button class="btn" onclick="openBookingModal(${m.id})">Забронировать</button>
                     `;
                     list.appendChild(card);
                 }
@@ -240,36 +331,84 @@
             renderMovies(cat);
         }
 
-        function openAdminModal() { 
-            document.getElementById('adminModal').style.display = 'flex'; 
-        }
-
-        function closeAdminModal() { 
-            document.getElementById('adminModal').style.display = 'none'; 
-        }
+        function openAdminModal() { document.getElementById('adminModal').style.display = 'flex'; }
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 
         function addMovie() {
             const title = document.getElementById('m-title').value.trim();
-            const genre = document.getElementById('m-genre').value;
+            const category = document.getElementById('m-category').value;
+            const genre = document.getElementById('m-genre').value.trim() || "Фильм";
             const time = document.getElementById('m-time').value.trim();
             const day = document.getElementById('m-day').value.trim();
 
-            if (!title || !time) {
-                alert("Пожалуйста, заполните название и время!");
-                return;
-            }
+            if (!title || !time) return alert("Заполните название и время!");
 
-            moviesData.push({ id: Date.now(), title, genre, time, day: day || 'Сегодня' });
+            moviesData.push({ id: Date.now(), title, category, genre, time, day: day || 'Сегодня' });
             renderMovies();
             closeAdminModal();
 
             document.getElementById('m-title').value = '';
+            document.getElementById('m-genre').value = '';
             document.getElementById('m-time').value = '';
             document.getElementById('m-day').value = '';
         }
 
-        function joinSession(title) {
-            tg.sendData(JSON.stringify({ action: "watch", movie: title }));
+        /* Выбор места */
+        function openBookingModal(movieId) {
+            selectedMovie = moviesData.find(m => m.id === movieId);
+            selectedSeat = null;
+            document.getElementById('book-title').innerText = selectedMovie.title;
+            document.getElementById('booking-info').innerText = "Выберите место на схеме";
+
+            const seatsContainer = document.getElementById('seats-container');
+            seatsContainer.innerHTML = '';
+
+            // Создаем 3 ряда по 5 мест
+            for (let r = 1; r <= 3; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'seat-row';
+                
+                const label = document.createElement('div');
+                label.className = 'row-label';
+                label.innerText = `Ряд ${r}`;
+                rowDiv.appendChild(label);
+
+                for (let s = 1; s <= 5; s++) {
+                    const seat = document.createElement('div');
+                    seat.className = 'seat';
+                    seat.innerText = s;
+                    seat.onclick = () => selectSeat(seat, r, s);
+                    rowDiv.appendChild(seat);
+                }
+                seatsContainer.appendChild(rowDiv);
+            }
+
+            document.getElementById('bookingModal').style.display = 'flex';
+        }
+
+        function selectSeat(el, row, seatNum) {
+            document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedSeat = { row, seat: seatNum };
+            document.getElementById('booking-info').innerHTML = `Выбрано: <b>Ряд ${row}, Место ${seatNum}</b>`;
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+        }
+
+        function confirmBooking() {
+            if (!selectedSeat) return alert("Пожалуйста, выберите место!");
+
+            // Отправляем данные бронирования в бота
+            tg.sendData(JSON.stringify({
+                action: "book",
+                movie: selectedMovie.title,
+                time: selectedMovie.time,
+                day: selectedMovie.day,
+                row: selectedSeat.row,
+                seat: selectedSeat.seat
+            }));
         }
 
         renderMovies();
