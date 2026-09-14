@@ -141,6 +141,37 @@
             box-shadow: 0 0 25px rgba(225, 29, 72, 0.25);
         }
 
+        /* Переключатель вкладок в админке */
+        .admin-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .admin-tab {
+            flex: 1;
+            padding: 8px 4px;
+            background: #0d060a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .admin-tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
         input, select {
             width: 100%;
             padding: 11px;
@@ -259,31 +290,63 @@
         <button class="btn" style="background: var(--accent);" onclick="openAdminModal()">⚙️ Панель администратора</button>
     </div>
 
+    <!-- Модальное окно админки -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-body">
-            <h3 style="margin-top:0;">Запланировать показ</h3>
+            <h3 style="margin-top:0; text-align:center;">Панель управления</h3>
             
-            <label>Название:</label>
-            <input type="text" id="m-title" placeholder="Например: Астрал 5">
+            <div class="admin-tabs">
+                <div class="admin-tab active" onclick="switchAdminTab('tab-add-movie', this)">🎬 Новая афиша</div>
+                <div class="admin-tab" onclick="switchAdminTab('tab-free-ticket', this)">🎟 Бесплатный билет</div>
+            </div>
 
-            <label>Категория:</label>
-            <select id="m-category">
-                <option value="films">🎬 Фильмы</option>
-                <option value="series">📺 Сериалы</option>
-                <option value="anime">⛩ Аниме</option>
-            </select>
+            <!-- Вкладка 1: Назначение фильма -->
+            <div class="tab-content active" id="tab-add-movie">
+                <label>Название фильма:</label>
+                <input type="text" id="m-title" placeholder="Например: Астрал 5">
 
-            <label>Жанр:</label>
-            <input type="text" id="m-genre" placeholder="Ужасы / Драма">
+                <label>Категория:</label>
+                <select id="m-category">
+                    <option value="films">🎬 Фильмы</option>
+                    <option value="series">📺 Сериалы</option>
+                    <option value="anime">⛩ Аниме</option>
+                </select>
 
-            <label>Цена (руб):</label>
-            <input type="number" id="m-price" placeholder="350">
+                <label>Жанр:</label>
+                <input type="text" id="m-genre" placeholder="Ужасы / Драма">
 
-            <button class="btn" style="margin-bottom:8px;" onclick="addMovie()">Добавить сеанс</button>
-            <button class="btn" style="background:#475569;" onclick="closeModal('adminModal')">Отмена</button>
+                <label>Цена (руб):</label>
+                <input type="number" id="m-price" placeholder="350">
+
+                <button class="btn" style="margin-bottom:8px;" onclick="addMovie()">Добавить сеанс</button>
+            </div>
+
+            <!-- Вкладка 2: Выдача бесплатного билета -->
+            <div class="tab-content" id="tab-free-ticket">
+                <label>Выберите фильм:</label>
+                <select id="free-movie-select"></select>
+
+                <label>Сеанс:</label>
+                <select id="free-session-time">
+                    <option value="Сегодня в 18:00">Сегодня в 18:00</option>
+                    <option value="Сегодня в 21:00">Сегодня в 21:00</option>
+                    <option value="Завтра в 19:30">Завтра в 19:30</option>
+                </select>
+
+                <label>Ряд:</label>
+                <input type="number" id="free-row" min="1" max="3" value="1">
+
+                <label>Место:</label>
+                <input type="number" id="free-seat" min="1" max="5" value="1">
+
+                <button class="btn" style="margin-bottom:8px; background: #22c55e;" onclick="issueFreeTicket()">Выдать билет</button>
+            </div>
+
+            <button class="btn" style="background:#475569; margin-top:5px;" onclick="closeModal('adminModal')">Закрыть</button>
         </div>
     </div>
 
+    <!-- Модальное окно бронирования -->
     <div class="modal-overlay" id="bookingModal">
         <div class="modal-body">
             <h3 id="book-title" style="margin-top:0; text-align:center;"></h3>
@@ -311,6 +374,7 @@
         </div>
     </div>
 
+    <!-- Модальное окно оплаты -->
     <div class="modal-overlay" id="paymentModal">
         <div class="modal-body">
             <h3 style="margin-top:0; text-align:center;">Оплата билета</h3>
@@ -391,7 +455,25 @@
             renderMovies(cat);
         }
 
-        function openAdminModal() { document.getElementById('adminModal').style.display = 'flex'; }
+        function switchAdminTab(tabId, el) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function openAdminModal() {
+            const select = document.getElementById('free-movie-select');
+            select.innerHTML = '';
+            moviesData.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.title;
+                opt.innerText = m.title;
+                select.appendChild(opt);
+            });
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         function addMovie() {
@@ -409,6 +491,24 @@
             document.getElementById('m-title').value = '';
             document.getElementById('m-genre').value = '';
             document.getElementById('m-price').value = '';
+        }
+
+        function issueFreeTicket() {
+            const movie = document.getElementById('free-movie-select').value;
+            const session = document.getElementById('free-session-time').value;
+            const row = document.getElementById('free-row').value;
+            const seat = document.getElementById('free-seat').value;
+
+            if (!movie) return alert("Выберите фильм!");
+
+            tg.sendData(JSON.stringify({
+                action: "free_ticket",
+                movie: movie,
+                session: session,
+                row: row,
+                seat: seat
+            }));
+            closeModal('adminModal');
         }
 
         function openBookingModal(movieId) {
