@@ -1,188 +1,138 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz</title>
+    <title>Вибір місць — Кинотеатр</title>
+    <!-- Подключение Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --correct: #22c55e;
-        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #18181e);
+            color: var(--tg-theme-text-color, #ffffff);
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 16px;
-            box-sizing: border-box;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .progress-bar {
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .progress {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        .question-num {
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .question-text {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 24px;
-            line-height: 1.4;
-        }
-        .options {
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            align-items: center;
         }
-        .btn {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text);
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
+
+        h2 {
+            margin-bottom: 5px;
         }
-        .btn:active {
-            transform: scale(0.98);
-            background: var(--accent);
-        }
-        .finish-card {
+
+        .screen {
+            width: 80%;
+            height: 15px;
+            background: #444;
+            margin: 20px 0;
+            border-radius: 5px;
             text-align: center;
+            font-size: 10px;
+            line-height: 15px;
+            color: #aaa;
+            box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
         }
-        .score-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 12px;
+
+        .cinema-hall {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
         }
-        .score-desc {
-            color: var(--text-muted);
-            font-size: 16px;
-            line-height: 1.5;
-            margin-bottom: 24px;
-        }
-        .action-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
+
+        .seat {
+            width: 45px;
+            height: 45px;
+            background-color: #2e3138;
+            border: 1px solid #4f535d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
             cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .seat.selected {
+            background-color: #31b545;
+            color: #fff;
+            border-color: #279638;
+        }
+
+        .info {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #888);
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="app">
-        <div class="progress-bar"><div class="progress" id="progress"></div></div>
-        <div class="question-num" id="q-num">Вопрос 1 из 10</div>
-        <div class="question-text" id="q-text">Загрузка...</div>
-        <div class="options" id="options"></div>
+
+    <h2>🍿 Выбор мест</h2>
+    <div class="info">Нажмите на кресло, чтобы выбрать место</div>
+
+    <div class="screen">ЭКРАН</div>
+
+    <div class="cinema-hall" id="hall">
+        <!-- Места генерируются скриптом -->
     </div>
+
+    <div class="info" id="selected-info">Выбрано мест: 0</div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.expand(); // Разворачиваем окно на весь экран
 
-        const quizData = [
-            { q: "Сколько у меня жировых складок?", options: ["0", "1", "5", "10000000000"], correct: 3 },
-            { q: "Сколько у тебя жировых складок?", options: ["0", "0", "0", "винигред"], correct: 3 },
-            { q: "Сколько мы с тобой дружим?", options: ["2 месяца", "0 месецев", "6 месецев", "скафандр"], correct: 2 },
-            { q: "ЧТО лучше?", options: ["быть худым", "быть толстым", "зажиматься в боксах на дасте", "кирпичь"], correct: 2 },
-            { q: "Мой Любимый жанр фильмов?", options: ["Хоррор", "Комедии", "Фантастика", "Драмы"], correct: 0 },
-            { q: "ЧТО я выберу?", options: ["Кофе", "Чай", "Энергетик", "Тебя"], correct: 3 },
-            { q: "Куда я хочу поехать больше всего?", options: ["Горы", "Море", "Япония", "С тобой в касэ"], correct: 3 },
-            { q: "Какое у меня главное хобби?", options: ["быть 200 в касэ", "Музыка (хуйня)", "Спорт (тоже)", "Чтение (даже коментировать не буду)"], correct: 0 },
-            { q: "Какой мой любимый день в году?", options: ["любой", "с тобой", "хуй знает", "зихуй молодес"], correct: 1 },
-            { q: "Кто тут самая лучшая девочка?", options: ["Ты", "Точно ты", "100% ты", "Без вариантов ты"], correct: "all" }
-        ];
+        // Настройка главной кнопки Telegram
+        tg.MainButton.setText("ПОДТВЕРДИТЬ ВЫБОР");
+        tg.MainButton.setTextColor("#FFFFFF");
+        tg.MainButton.setColor("#31b545");
 
-        let currentQ = 0;
-        let score = 0;
+        const hall = document.getElementById('hall');
+        const selectedInfo = document.getElementById('selected-info');
+        const totalSeats = 15;
+        const selectedSeats = new Set();
 
-        function loadQuestion() {
-            if (currentQ >= quizData.length) {
-                showResult();
-                return;
+        // Генерация сетки кресел
+        for (let i = 1; i <= totalSeats; i++) {
+            const seat = document.createElement('div');
+            seat.classList.add('seat');
+            seat.innerText = i;
+            seat.addEventListener('click', () => toggleSeat(i, seat));
+            hall.appendChild(seat);
+        }
+
+        function toggleSeat(seatNum, seatElement) {
+            if (selectedSeats.has(seatNum)) {
+                selectedSeats.delete(seatNum);
+                seatElement.classList.remove('selected');
+            } else {
+                selectedSeats.add(seatNum);
+                seatElement.classList.add('selected');
             }
-            const q = quizData[currentQ];
-            document.getElementById('q-num').innerText = `Вопрос ${currentQ + 1} из ${quizData.length}`;
-            document.getElementById('q-text').innerText = q.q;
-            document.getElementById('progress').style.width = `${((currentQ) / quizData.length) * 100}%`;
 
-            const optsDiv = document.getElementById('options');
-            optsDiv.innerHTML = '';
-            q.options.forEach((opt, idx) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn';
-                btn.innerText = opt;
-                btn.onclick = () => selectAnswer(idx);
-                optsDiv.appendChild(btn);
-            });
-        }
+            selectedInfo.innerText = `Выбрано мест: ${selectedSeats.size}`;
 
-        function selectAnswer(idx) {
-            const target = quizData[currentQ].correct;
-            if (target === "all" || idx === target) {
-                score++;
+            if (selectedSeats.size > 0) {
+                tg.MainButton.show();
+            } else {
+                tg.MainButton.hide();
             }
-            currentQ++;
-            loadQuestion();
         }
 
-        function showResult() {
-            document.getElementById('app').innerHTML = `
-                <div class="finish-card">
-                    <div class="score-title">🎉 Викторина завершена!</div>
-                    <div class="score-desc">Ты ответила правильно на <b>${score}</b> из ${quizData.length} вопросов.</div>
-                    <button class="action-btn" onclick="sendData(${score})">Завершить</button>
-                </div>
-            `;
-        }
-
-        function sendData(finalScore) {
-            tg.sendData(JSON.stringify({ score: finalScore }));
-            tg.close();
-        }
-
-        loadQuestion();
+        // Отправка данных обратно в Telegram бот
+        Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            const data = {
+                action: "booking",
+                session_id: 1,
+                seats: Array.from(selectedSeats)
+            };
+            tg.sendData(JSON.stringify(data)); // Передаем JSON в бот
+        });
     </script>
 </body>
 </html>
