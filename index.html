@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вибір місць — Кинотеатр</title>
-    <!-- Подключение Telegram Web App SDK -->
+    <title>Выбор мест</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #18181e);
+            background-color: var(--tg-theme-bg-color, #0f172a);
             color: var(--tg-theme-text-color, #ffffff);
             margin: 0;
             padding: 20px;
@@ -22,31 +21,18 @@
             margin-bottom: 5px;
         }
 
-        .screen {
-            width: 80%;
-            height: 15px;
-            background: #444;
-            margin: 20px 0;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 10px;
-            line-height: 15px;
-            color: #aaa;
-            box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
-        }
-
         .cinema-hall {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
-            margin-bottom: 30px;
+            margin: 25px 0;
         }
 
         .seat {
             width: 45px;
             height: 45px;
-            background-color: #2e3138;
-            border: 1px solid #4f535d;
+            background-color: #1e293b;
+            border: 1px solid #334155;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -58,14 +44,14 @@
         }
 
         .seat.selected {
-            background-color: #31b545;
+            background-color: #22c55e;
             color: #fff;
-            border-color: #279638;
+            border-color: #16a34a;
         }
 
         .info {
             font-size: 14px;
-            color: var(--tg-theme-hint-color, #888);
+            color: var(--tg-theme-hint-color, #94a3b8);
             margin-top: 10px;
         }
     </style>
@@ -75,29 +61,23 @@
     <h2>🍿 Выбор мест</h2>
     <div class="info">Нажмите на кресло, чтобы выбрать место</div>
 
-    <div class="screen">ЭКРАН</div>
-
-    <div class="cinema-hall" id="hall">
-        <!-- Места генерируются скриптом -->
-    </div>
+    <div class="cinema-hall" id="hall"></div>
 
     <div class="info" id="selected-info">Выбрано мест: 0</div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем окно на весь экран
+        tg.expand();
 
-        // Настройка главной кнопки Telegram
         tg.MainButton.setText("ПОДТВЕРДИТЬ ВЫБОР");
         tg.MainButton.setTextColor("#FFFFFF");
-        tg.MainButton.setColor("#31b545");
+        tg.MainButton.setColor("#22c55e");
 
         const hall = document.getElementById('hall');
         const selectedInfo = document.getElementById('selected-info');
         const totalSeats = 15;
         const selectedSeats = new Set();
 
-        // Генерация сетки кресел
         for (let i = 1; i <= totalSeats; i++) {
             const seat = document.createElement('div');
             seat.classList.add('seat');
@@ -124,14 +104,13 @@
             }
         }
 
-        // Отправка данных обратно в Telegram бот
         Telegram.WebApp.onEvent('mainButtonClicked', function() {
             const data = {
                 action: "booking",
                 session_id: 1,
                 seats: Array.from(selectedSeats)
             };
-            tg.sendData(JSON.stringify(data)); // Передаем JSON в бот
+            tg.sendData(JSON.stringify(data));
         });
     </script>
 </body>
