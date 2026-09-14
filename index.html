@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кинотеатр Mini App</title>
+    <title>Кинотеатр Сакура</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #22c55e;
+            --bg-color: #0d060a;
+            --card-bg: rgba(26, 15, 22, 0.75);
+            --accent: #e11d48;
             --text: #ffffff;
-            --text-muted: #94a3b8;
-            --border: #334155;
+            --text-muted: #fda4af;
+            --border: rgba(225, 29, 72, 0.3);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
+            background: var(--bg-color) url('bg.jpg') no-repeat center top / cover fixed;
             color: var(--text);
             margin: 0;
             padding: 16px;
             box-sizing: border-box;
-            padding-bottom: 80px;
+            padding-bottom: 90px;
+            padding-top: 140px; /* Отступ сверху, чтобы логотип "Сакура" оставался видимым */
         }
 
         .categories {
@@ -34,18 +35,20 @@
         }
 
         .cat-chip {
-            background: var(--card-bg);
+            background: rgba(20, 10, 16, 0.8);
             border: 1px solid var(--border);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 13px;
             white-space: nowrap;
             cursor: pointer;
+            backdrop-filter: blur(5px);
         }
 
         .cat-chip.active {
-            background: #3b82f6;
-            border-color: #3b82f6;
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(225, 29, 72, 0.5);
         }
 
         .catalog-grid {
@@ -59,6 +62,7 @@
             border-radius: 12px;
             padding: 12px;
             border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -71,7 +75,7 @@
         }
 
         .movie-time {
-            color: #ef4444;
+            color: #f43f5e;
             font-weight: bold;
             font-size: 13px;
             margin-bottom: 8px;
@@ -88,21 +92,21 @@
             font-size: 12px;
         }
 
-        /* Фиксированная кнопка Админ-панели */
         .admin-footer {
             display: none;
             position: fixed;
             bottom: 0;
             left: 0; 
             right: 0;
-            background: #020617;
+            background: rgba(13, 6, 10, 0.95);
             border-top: 1px solid var(--border);
             padding: 12px 16px;
             z-index: 90;
+            backdrop-filter: blur(10px);
         }
 
         .admin-btn {
-            background: #ef4444;
+            background: var(--accent);
             color: white;
             border: none;
             padding: 12px;
@@ -113,14 +117,10 @@
             font-size: 14px;
         }
 
-        /* Модальное окно */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.85);
             padding: 20px;
             z-index: 999;
@@ -129,7 +129,7 @@
         }
 
         .modal-body {
-            background: var(--card-bg);
+            background: #1a0f16;
             padding: 20px;
             border-radius: 12px;
             width: 100%;
@@ -142,7 +142,7 @@
             width: 100%;
             padding: 10px;
             margin: 6px 0 14px 0;
-            background: var(--bg-color);
+            background: #0d060a;
             border: 1px solid var(--border);
             color: var(--text);
             border-radius: 8px;
@@ -153,7 +153,7 @@
 </head>
 <body>
 
-    <h3>🎬 Расписание сеансов</h3>
+    <h3 style="text-align: center; margin-bottom: 15px;">🌸 Расписание сеансов</h3>
 
     <div class="categories">
         <div class="cat-chip active" onclick="filterCat('all', this)">Все</div>
@@ -165,12 +165,10 @@
 
     <div class="catalog-grid" id="movies-list"></div>
 
-    <!-- Панель администратора -->
     <div class="admin-footer" id="adminPanel">
         <button class="admin-btn" onclick="openAdminModal()">⚙️ Панель администратора</button>
     </div>
 
-    <!-- Модальное окно для админа -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-body">
             <h3 style="margin-top:0;">Запланировать показ</h3>
@@ -193,7 +191,7 @@
             <input type="text" id="m-day" placeholder="Сегодня / Завтра / Пятница">
 
             <button class="btn" style="width:100%; padding:12px; margin-bottom:8px;" onclick="addMovie()">Запланировать показ</button>
-            <button class="btn" style="width:100%; padding:10px; background:#64748b;" onclick="closeAdminModal()">Отмена</button>
+            <button class="btn" style="width:100%; padding:10px; background:#475569;" onclick="closeAdminModal()">Отмена</button>
         </div>
     </div>
 
@@ -202,14 +200,11 @@
         tg.ready();
         tg.expand();
 
-        // Разрешенные юзернеймы без @ в нижнем регистре
         const ADMINS = ["siqhnn", "fuckvskrytiye", "polomad"];
 
-        // Получение username текущего пользователя
         const user = tg.initDataUnsafe?.user;
         const currentUsername = (user?.username || "").toLowerCase();
 
-        // Проверка прав администратора
         if (ADMINS.includes(currentUsername)) {
             document.getElementById('adminPanel').style.display = 'block';
         }
