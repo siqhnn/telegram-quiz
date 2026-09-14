@@ -88,52 +88,66 @@
             font-size: 12px;
         }
 
-        /* Админ-панель скрыта по умолчанию */
+        /* Фиксированная кнопка Админ-панели */
         .admin-footer {
             display: none;
             position: fixed;
             bottom: 0;
-            left: 0; right: 0;
+            left: 0; 
+            right: 0;
             background: #020617;
             border-top: 1px solid var(--border);
-            padding: 10px 16px;
+            padding: 12px 16px;
+            z-index: 90;
         }
 
         .admin-btn {
             background: #ef4444;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             font-weight: bold;
             width: 100%;
             cursor: pointer;
+            font-size: 14px;
         }
 
-        .modal {
+        /* Модальное окно */
+        .modal-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.85);
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
             padding: 20px;
-            z-index: 100;
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-body {
             background: var(--card-bg);
-            padding: 16px;
+            padding: 20px;
             border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            border: 1px solid var(--border);
         }
 
         input, select {
             width: 100%;
             padding: 10px;
-            margin: 6px 0 12px 0;
+            margin: 6px 0 14px 0;
             background: var(--bg-color);
             border: 1px solid var(--border);
             color: var(--text);
             border-radius: 8px;
             box-sizing: border-box;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -143,7 +157,7 @@
 
     <div class="categories">
         <div class="cat-chip active" onclick="filterCat('all', this)">Все</div>
-        <div class="cat-chip" onclick="filterCat('horror', this)">👻 Ужасы / Хоррор</div>
+        <div class="cat-chip" onclick="filterCat('horror', this)">👻 Ужасы</div>
         <div class="cat-chip" onclick="filterCat('films', this)">🎬 Фильмы</div>
         <div class="cat-chip" onclick="filterCat('anime', this)">⛩ Аниме</div>
         <div class="cat-chip" onclick="filterCat('series', this)">📺 Сериалы</div>
@@ -151,15 +165,15 @@
 
     <div class="catalog-grid" id="movies-list"></div>
 
-    <!-- Кнопка админ-панели (отображается только администраторам) -->
+    <!-- Панель администратора -->
     <div class="admin-footer" id="adminPanel">
         <button class="admin-btn" onclick="openAdminModal()">⚙️ Панель администратора</button>
     </div>
 
-    <!-- Модалка планирования сеанса -->
-    <div class="modal" id="adminModal">
+    <!-- Модальное окно для админа -->
+    <div class="modal-overlay" id="adminModal">
         <div class="modal-body">
-            <h3>Запланировать показ</h3>
+            <h3 style="margin-top:0;">Запланировать показ</h3>
             
             <label>Название фильма / сериала:</label>
             <input type="text" id="m-title" placeholder="Например: Астрал 5">
@@ -178,26 +192,25 @@
             <label>День недели / Дата:</label>
             <input type="text" id="m-day" placeholder="Сегодня / Завтра / Пятница">
 
-            <button class="btn" style="width:100%; margin-bottom:8px;" onclick="addMovie()">Запланировать показ</button>
-            <button class="btn" style="width:100%; background:#64748b;" onclick="closeAdminModal()">Отмена</button>
+            <button class="btn" style="width:100%; padding:12px; margin-bottom:8px;" onclick="addMovie()">Запланировать показ</button>
+            <button class="btn" style="width:100%; padding:10px; background:#64748b;" onclick="closeAdminModal()">Отмена</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.ready();
         tg.expand();
 
-        // Список разрешенных юзернеймов администраторов
-        const ADMINS = ["siqhnn", "Fuckvskrytiye", "Polomad"]; 
+        // Разрешенные юзернеймы без @ в нижнем регистре
+        const ADMINS = ["siqhnn", "fuckvskrytiye", "polomad"];
 
+        // Получение username текущего пользователя
         const user = tg.initDataUnsafe?.user;
-        const rawUsername = user?.username || "";
-        const currentUsername = rawUsername.replace("@", "").toLowerCase();
+        const currentUsername = (user?.username || "").toLowerCase();
 
-        // Проверка прав: переводим всё в нижний регистр для точного совпадения
-        const isAdmin = ADMINS.some(admin => admin.toLowerCase() === currentUsername);
-
-        if (isAdmin) {
+        // Проверка прав администратора
+        if (ADMINS.includes(currentUsername)) {
             document.getElementById('adminPanel').style.display = 'block';
         }
 
@@ -232,22 +245,29 @@
             renderMovies(cat);
         }
 
-        function openAdminModal() { document.getElementById('adminModal').style.display = 'block'; }
-        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+        function openAdminModal() { 
+            document.getElementById('adminModal').style.display = 'flex'; 
+        }
+
+        function closeAdminModal() { 
+            document.getElementById('adminModal').style.display = 'none'; 
+        }
 
         function addMovie() {
-            const title = document.getElementById('m-title').value;
+            const title = document.getElementById('m-title').value.trim();
             const genre = document.getElementById('m-genre').value;
-            const time = document.getElementById('m-time').value;
-            const day = document.getElementById('m-day').value;
+            const time = document.getElementById('m-time').value.trim();
+            const day = document.getElementById('m-day').value.trim();
 
-            if (!title || !time) return alert("Заполните название и время!");
+            if (!title || !time) {
+                alert("Пожалуйста, заполните название и время!");
+                return;
+            }
 
-            moviesData.push({ id: Date.now(), title, genre, time, day });
+            moviesData.push({ id: Date.now(), title, genre, time, day: day || 'Сегодня' });
             renderMovies();
             closeAdminModal();
 
-            // Очищаем инпуты
             document.getElementById('m-title').value = '';
             document.getElementById('m-time').value = '';
             document.getElementById('m-day').value = '';
