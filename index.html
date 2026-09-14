@@ -22,40 +22,9 @@
             margin: 0;
             padding: 16px;
             box-sizing: border-box;
-            padding-bottom: 70px;
+            padding-bottom: 80px;
         }
 
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            background-color: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Категории каталога */
         .categories {
             display: flex;
             gap: 8px;
@@ -79,7 +48,6 @@
             border-color: #3b82f6;
         }
 
-        /* Сетка фильмов */
         .catalog-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -98,32 +66,15 @@
 
         .movie-title {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
             margin-bottom: 4px;
         }
 
-        .movie-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        /* Снеки */
-        .snacks-list {
-            display: flex;
-            flex-direction: flex-direction;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .snack-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--card-bg);
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+        .movie-time {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
         }
 
         .btn {
@@ -137,39 +88,34 @@
             font-size: 12px;
         }
 
-        /* Нижняя фиксированная админ-панель */
+        /* Админ-панель скрыта по умолчанию */
         .admin-footer {
+            display: none;
             position: fixed;
             bottom: 0;
-            left: 0;
-            right: 0;
+            left: 0; right: 0;
             background: #020617;
             border-top: 1px solid var(--border);
             padding: 10px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .admin-btn {
             background: #ef4444;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px;
             border-radius: 8px;
             font-weight: bold;
-            cursor: pointer;
             width: 100%;
+            cursor: pointer;
         }
 
-        /* Модальное окно Админ-панели */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             padding: 20px;
-            box-sizing: border-box;
             z-index: 100;
         }
 
@@ -177,14 +123,12 @@
             background: var(--card-bg);
             padding: 16px;
             border-radius: 12px;
-            max-height: 80vh;
-            overflow-y: auto;
         }
 
-        select, input {
+        input, select {
             width: 100%;
             padding: 10px;
-            margin: 8px 0 15px 0;
+            margin: 6px 0 12px 0;
             background: var(--bg-color);
             border: 1px solid var(--border);
             color: var(--text);
@@ -195,68 +139,47 @@
 </head>
 <body>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('catalog')">🎬 Каталог</button>
-        <button class="tab-btn" onclick="switchTab('snacks')">🍿 Вкусняшки</button>
+    <h3>🎬 Расписание сеансов</h3>
+
+    <div class="categories">
+        <div class="cat-chip active" onclick="filterCat('all', this)">Все</div>
+        <div class="cat-chip" onclick="filterCat('horror', this)">👻 Ужасы / Хоррор</div>
+        <div class="cat-chip" onclick="filterCat('films', this)">🎬 Фильмы</div>
+        <div class="cat-chip" onclick="filterCat('anime', this)">⛩ Аниме</div>
+        <div class="cat-chip" onclick="filterCat('series', this)">📺 Сериалы</div>
     </div>
 
-    <!-- Вкладка Каталог -->
-    <div id="tab-catalog" class="tab-content active">
-        <div class="categories">
-            <div class="cat-chip active" onclick="filterCategory('all', this)">Все</div>
-            <div class="cat-chip" onclick="filterCategory('films', this)">🎬 Фильмы</div>
-            <div class="cat-chip" onclick="filterCategory('series', this)">📺 Сериалы</div>
-            <div class="cat-chip" onclick="filterCategory('anime', this)">⛩ Аниме</div>
-            <div class="cat-chip" onclick="filterCategory('horror', this)">👻 Ужасы</div>
-        </div>
+    <div class="catalog-grid" id="movies-list"></div>
 
-        <div class="catalog-grid" id="movies-list"></div>
+    <!-- Кнопка админ-панели (отображается только администраторам) -->
+    <div class="admin-footer" id="adminPanel">
+        <button class="admin-btn" onclick="openAdminModal()">⚙️ Панель администратора</button>
     </div>
 
-    <!-- Вкладка Вкусняшки -->
-    <div id="tab-snacks" class="tab-content">
-        <div class="snacks-list">
-            <div class="snack-card">
-                <div><b>🍿 Попкорн Соленый</b><br><small style="color:var(--text-muted)">300 ₽</small></div>
-                <button class="btn" onclick="addSnack('Попкорн Соленый', 300)">+ Добавить</button>
-            </div>
-            <div class="snack-card">
-                <div><b>🍿 Попкорн Сладкий</b><br><small style="color:var(--text-muted)">350 ₽</small></div>
-                <button class="btn" onclick="addSnack('Попкорн Сладкий', 350)">+ Добавить</button>
-            </div>
-            <div class="snack-card">
-                <div><b>🥤 Кола 0.5л</b><br><small style="color:var(--text-muted)">150 ₽</small></div>
-                <button class="btn" onclick="addSnack('Кола 0.5л', 150)">+ Добавить</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Панель Администратора -->
-    <div class="admin-footer">
-        <button class="admin-btn" onclick="openAdminModal()">⚙️ Админ-панель (Расписание)</button>
-    </div>
-
-    <!-- Модальное окно Админки -->
+    <!-- Модалка планирования сеанса -->
     <div class="modal" id="adminModal">
         <div class="modal-body">
-            <h3>⚙️ Управление показами</h3>
+            <h3>Запланировать показ</h3>
             
-            <label>Выберите день:</label>
-            <select id="admin-day">
-                <option value="Понедельник">Понедельник</option>
-                <option value="Вторник">Вторник</option>
-                <option value="Среда">Среда</option>
-                <option value="Четверг">Четверг</option>
-                <option value="Пятница">Пятница</option>
-                <option value="Суббота">Суббота</option>
-                <option value="Воскресенье">Воскресенье</option>
+            <label>Название фильма / сериала:</label>
+            <input type="text" id="m-title" placeholder="Например: Астрал 5">
+
+            <label>Жанр:</label>
+            <select id="m-genre">
+                <option value="horror">👻 Ужасы / Хоррор</option>
+                <option value="films">🎬 Фильм</option>
+                <option value="anime">⛩ Аниме</option>
+                <option value="series">📺 Сериал</option>
             </select>
 
-            <label>Выберите фильм из каталога:</label>
-            <select id="admin-movie"></select>
+            <label>Время начала:</label>
+            <input type="text" id="m-time" placeholder="Например: 20:00">
 
-            <button class="btn" style="width:100%; margin-bottom:10px;" onclick="saveSchedule()">Закрепить за днем</button>
-            <button class="btn" style="width:100%; background:#64748b;" onclick="closeAdminModal()">Закрыть</button>
+            <label>День недели / Дата:</label>
+            <input type="text" id="m-day" placeholder="Сегодня / Завтра / Пятница">
+
+            <button class="btn" style="width:100%; margin-bottom:8px;" onclick="addMovie()">Запланировать показ</button>
+            <button class="btn" style="width:100%; background:#64748b;" onclick="closeAdminModal()">Отмена</button>
         </div>
     </div>
 
@@ -264,119 +187,75 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        tg.MainButton.setText("ОФОРМИТЬ ЗАКАЗ");
-        tg.MainButton.setColor("#22c55e");
+        // Список разрешенных юзернеймов администраторов
+        const ADMINS = ["siqhnn", "Fuckvskrytiye", "Polomad"]; 
 
-        const movies = [
-            { id: 1, title: "Интерстеллар", cat: "films", day: "Пятница" },
-            { id: 2, title: "Уэнсдей", cat: "series", day: "Суббота" },
-            { id: 3, title: "Атака Титанов", cat: "anime", day: "Воскресенье" },
-            { id: 4, title: "Заклятие", cat: "horror", day: "Четверг" },
-            { id: 5, title: "Темный рыцарь", cat: "films", day: "Среда" },
-            { id: 6, title: "Астрал", cat: "horror", day: "Вторник" }
+        const user = tg.initDataUnsafe?.user;
+        const rawUsername = user?.username || "";
+        const currentUsername = rawUsername.replace("@", "").toLowerCase();
+
+        // Проверка прав: переводим всё в нижний регистр для точного совпадения
+        const isAdmin = ADMINS.some(admin => admin.toLowerCase() === currentUsername);
+
+        if (isAdmin) {
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+
+        let moviesData = [
+            { id: 1, title: "Астрал 5", genre: "horror", time: "18:00", day: "Сегодня" },
+            { id: 2, title: "Интерстеллар", genre: "films", time: "21:00", day: "Завтра" }
         ];
-
-        let selectedMovie = null;
-        let selectedSnacks = [];
 
         function renderMovies(filter = 'all') {
             const list = document.getElementById('movies-list');
             list.innerHTML = '';
 
-            movies.forEach(m => {
-                if (filter === 'all' || m.cat === filter) {
+            moviesData.forEach(m => {
+                if (filter === 'all' || m.genre === filter) {
                     const card = document.createElement('div');
                     card.className = 'movie-card';
                     card.innerHTML = `
                         <div>
                             <div class="movie-title">${m.title}</div>
-                            <div class="movie-meta">Показ: <b>${m.day}</b></div>
+                            <div class="movie-time">⏰ ${m.day} в ${m.time}</div>
                         </div>
-                        <button class="btn" onclick="selectMovie('${m.title}', '${m.day}', this)">Выбрать</button>
+                        <button class="btn" onclick="joinSession('${m.title}')">Смотреть</button>
                     `;
                     list.appendChild(card);
                 }
             });
         }
 
-        function filterCategory(cat, el) {
+        function filterCat(cat, el) {
             document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
             renderMovies(cat);
         }
 
-        function selectMovie(title, day, btn) {
-            selectedMovie = { title, day };
-            document.querySelectorAll('.movie-card .btn').forEach(b => b.innerText = 'Выбрать');
-            btn.innerText = '✓ Выбран';
-            updateMainButton();
+        function openAdminModal() { document.getElementById('adminModal').style.display = 'block'; }
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+
+        function addMovie() {
+            const title = document.getElementById('m-title').value;
+            const genre = document.getElementById('m-genre').value;
+            const time = document.getElementById('m-time').value;
+            const day = document.getElementById('m-day').value;
+
+            if (!title || !time) return alert("Заполните название и время!");
+
+            moviesData.push({ id: Date.now(), title, genre, time, day });
+            renderMovies();
+            closeAdminModal();
+
+            // Очищаем инпуты
+            document.getElementById('m-title').value = '';
+            document.getElementById('m-time').value = '';
+            document.getElementById('m-day').value = '';
         }
 
-        function addSnack(name, price) {
-            selectedSnacks.push({ name, price });
-            updateMainButton();
+        function joinSession(title) {
+            tg.sendData(JSON.stringify({ action: "watch", movie: title }));
         }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
-            if (tab === 'catalog') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('tab-catalog').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('tab-snacks').classList.add('active');
-            }
-        }
-
-        function updateMainButton() {
-            if (selectedMovie || selectedSnacks.length > 0) {
-                tg.MainButton.show();
-            } else {
-                tg.MainButton.hide();
-            }
-        }
-
-        /* Логика Админ-панели */
-        function openAdminModal() {
-            const select = document.getElementById('admin-movie');
-            select.innerHTML = '';
-            movies.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.id;
-                opt.innerText = m.title;
-                select.appendChild(opt);
-            });
-            document.getElementById('adminModal').style.display = 'block';
-        }
-
-        function closeAdminModal() {
-            document.getElementById('adminModal').style.display = 'none';
-        }
-
-        function saveSchedule() {
-            const day = document.getElementById('admin-day').value;
-            const movieId = parseInt(document.getElementById('admin-movie').value);
-            
-            const movie = movies.find(m => m.id === movieId);
-            if (movie) {
-                movie.day = day;
-                renderMovies();
-                closeAdminModal();
-                alert(`Фильм "${movie.title}" перенесен на ${day}!`);
-            }
-        }
-
-        /* Отправка данных боту */
-        Telegram.WebApp.onEvent('mainButtonClicked', function() {
-            const data = {
-                action: "order",
-                movie: selectedMovie,
-                snacks: selectedSnacks
-            };
-            tg.sendData(JSON.stringify(data));
-        });
 
         renderMovies();
     </script>
