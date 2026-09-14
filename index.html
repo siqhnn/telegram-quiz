@@ -3,101 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор мест</title>
+    <title>Кинотеатр Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #22c55e;
+            --text: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #0f172a);
-            color: var(--tg-theme-text-color, #ffffff);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
             margin: 0;
-            padding: 20px;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        .tabs {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        h2 {
-            margin-bottom: 5px;
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background-color: var(--card-bg);
+            border: 1px solid #334155;
+            color: var(--text);
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
         }
 
+        .tab-btn.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Выбор мест (100 кресел) */
         .cinema-hall {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin: 25px 0;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 6px;
+            margin-top: 15px;
         }
 
         .seat {
-            width: 45px;
-            height: 45px;
-            background-color: #1e293b;
+            aspect-ratio: 1;
+            background-color: var(--card-bg);
             border: 1px solid #334155;
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 11px;
             font-weight: bold;
             cursor: pointer;
             user-select: none;
-            transition: all 0.2s ease;
         }
 
         .seat.selected {
-            background-color: #22c55e;
+            background-color: var(--accent);
             color: #fff;
             border-color: #16a34a;
         }
 
-        .info {
+        /* Меню вкусняшек */
+        .snacks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .snack-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+
+        .snack-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .snack-btn:active {
+            opacity: 0.8;
+        }
+
+        .info-text {
+            text-align: center;
+            color: var(--text-muted);
             font-size: 14px;
-            color: var(--tg-theme-hint-color, #94a3b8);
-            margin-top: 10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
-    <h2>🍿 Выбор мест</h2>
-    <div class="info">Нажмите на кресло, чтобы выбрать место</div>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('seats')">🎟 Зал (100 мест)</button>
+        <button class="tab-btn" onclick="switchTab('snacks')">🍿 Вкусняшки</button>
+    </div>
 
-    <div class="cinema-hall" id="hall"></div>
+    <!-- Вкладка для выбора мест -->
+    <div id="tab-seats" class="tab-content active">
+        <div class="info-text">Выберите подходящие места в зале:</div>
+        <div class="cinema-hall" id="hall"></div>
+    </div>
 
-    <div class="info" id="selected-info">Выбрано мест: 0</div>
+    <!-- Вкладка для выбора вкусняшек -->
+    <div id="tab-snacks" class="tab-content">
+        <div class="info-text">Выберите напитки и снеки:</div>
+        <div class="snacks-list">
+            <div class="snack-card">
+                <div>
+                    <div><b>🍿 Попкорн Соленый</b></div>
+                    <div style="color: var(--text-muted); font-size: 13px;">300 ₽</div>
+                </div>
+                <button class="snack-btn" onclick="addSnack('Попкорн Соленый', 300)">+ Добавить</button>
+            </div>
+            <div class="snack-card">
+                <div>
+                    <div><b>🍿 Попкорн Сладкий</b></div>
+                    <div style="color: var(--text-muted); font-size: 13px;">350 ₽</div>
+                </div>
+                <button class="snack-btn" onclick="addSnack('Попкорн Сладкий', 350)">+ Добавить</button>
+            </div>
+            <div class="snack-card">
+                <div>
+                    <div><b>🍿 Попкорн Карамельный</b></div>
+                    <div style="color: var(--text-muted); font-size: 13px;">380 ₽</div>
+                </div>
+                <button class="snack-btn" onclick="addSnack('Попкорн Карамельный', 380)">+ Добавить</button>
+            </div>
+            <div class="snack-card">
+                <div>
+                    <div><b>🥤 Кола 0.5л</b></div>
+                    <div style="color: var(--text-muted); font-size: 13px;">150 ₽</div>
+                </div>
+                <button class="snack-btn" onclick="addSnack('Кола 0.5л', 150)">+ Добавить</button>
+            </div>
+            <div class="snack-card">
+                <div>
+                    <div><b>🥤 Спрайт 0.5л</b></div>
+                    <div style="color: var(--text-muted); font-size: 13px;">150 ₽</div>
+                </div>
+                <button class="snack-btn" onclick="addSnack('Спрайт 0.5л', 150)">+ Добавить</button>
+            </div>
+            <div class="snack-card">
+                <div>
+                    <div><b>🧃 Сок в ассортименте 0.5л</b></div>
+                    <div style="color: var(--text-muted); font-size: 13px;">130 ₽</div>
+                </div>
+                <button class="snack-btn" onclick="addSnack('Сок 0.5л', 130)">+ Добавить</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        tg.MainButton.setText("ПОДТВЕРДИТЬ ВЫБОР");
-        tg.MainButton.setTextColor("#FFFFFF");
+        tg.MainButton.setText("ПОДТВЕРДИТЬ И ОФОРМИТЬ");
         tg.MainButton.setColor("#22c55e");
 
-        const hall = document.getElementById('hall');
-        const selectedInfo = document.getElementById('selected-info');
-        const totalSeats = 15;
         const selectedSeats = new Set();
+        const selectedSnacks = [];
 
-        for (let i = 1; i <= totalSeats; i++) {
+        // Создание 100 мест в зале
+        const hall = document.getElementById('hall');
+        for (let i = 1; i <= 100; i++) {
             const seat = document.createElement('div');
             seat.classList.add('seat');
             seat.innerText = i;
-            seat.addEventListener('click', () => toggleSeat(i, seat));
+            seat.onclick = () => {
+                if (selectedSeats.has(i)) {
+                    selectedSeats.delete(i);
+                    seat.classList.remove('selected');
+                } else {
+                    selectedSeats.add(i);
+                    seat.classList.add('selected');
+                }
+                updateMainButton();
+            };
             hall.appendChild(seat);
         }
 
-        function toggleSeat(seatNum, seatElement) {
-            if (selectedSeats.has(seatNum)) {
-                selectedSeats.delete(seatNum);
-                seatElement.classList.remove('selected');
-            } else {
-                selectedSeats.add(seatNum);
-                seatElement.classList.add('selected');
+        function addSnack(name, price) {
+            selectedSnacks.push({ name, price });
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
             }
+            updateMainButton();
+        }
 
-            selectedInfo.innerText = `Выбрано мест: ${selectedSeats.size}`;
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            if (selectedSeats.size > 0) {
+            if (tab === 'seats') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-seats').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-snacks').classList.add('active');
+            }
+        }
+
+        function updateMainButton() {
+            const seatsCount = selectedSeats.size;
+            const snacksCount = selectedSnacks.length;
+
+            if (seatsCount > 0 || snacksCount > 0) {
+                tg.MainButton.setText(`ОФОРМИТЬ (Мест: ${seatsCount}, Снеков: ${snacksCount})`);
                 tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
@@ -106,9 +247,9 @@
 
         Telegram.WebApp.onEvent('mainButtonClicked', function() {
             const data = {
-                action: "booking",
-                session_id: 1,
-                seats: Array.from(selectedSeats)
+                action: "order",
+                seats: Array.from(selectedSeats),
+                snacks: selectedSnacks
             };
             tg.sendData(JSON.stringify(data));
         });
