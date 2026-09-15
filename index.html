@@ -101,10 +101,42 @@
         .section-title {
             font-size: 18px;
             font-weight: 700;
-            margin: 20px 0 12px;
+            margin: 16px 0 12px;
             color: #fff;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        /* Фильтры категорий */
+        .category-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            scrollbar-width: none;
+        }
+
+        .category-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cat-chip {
+            padding: 6px 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-sub);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .cat-chip.active {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--pink-light);
+            box-shadow: 0 0 8px var(--pink-glow);
         }
 
         .movies-grid {
@@ -145,14 +177,27 @@
             position: absolute;
             top: 8px;
             right: 8px;
-            background: rgba(15, 10, 20, 0.8);
+            background: rgba(15, 10, 20, 0.85);
             backdrop-filter: blur(8px);
             padding: 4px 8px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: var(--pink-light);
             border: 1px solid var(--card-border);
+        }
+
+        .status-tag {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(255, 42, 133, 0.85);
+            color: #fff;
+            padding: 3px 7px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
         .movie-info {
@@ -160,6 +205,14 @@
             display: flex;
             flex-direction: column;
             flex: 1;
+        }
+
+        .movie-category-label {
+            font-size: 10px;
+            color: var(--pink-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
         }
 
         .movie-title {
@@ -187,7 +240,7 @@
             text-align: center;
         }
 
-        /* Список билетов */
+        /* Список билетов и история */
         .ticket-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -214,7 +267,7 @@
         .empty-tickets {
             text-align: center;
             color: var(--text-sub);
-            margin-top: 40px;
+            margin: 20px 0;
             font-size: 14px;
         }
 
@@ -364,12 +417,12 @@
 
         .btn-main {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: linear-gradient(135deg, var(--accent-color), #d01560);
             border: none;
             border-radius: var(--radius-md);
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 15px var(--pink-glow);
@@ -378,6 +431,11 @@
         .btn-main:disabled {
             opacity: 0.5;
             box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4d4d, #b30000);
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
         }
 
         /* Формы и Инпуты */
@@ -392,7 +450,7 @@
             margin-bottom: 6px;
         }
 
-        .input-control {
+        .input-control, select.input-control {
             width: 100%;
             padding: 12px;
             background: rgba(255, 255, 255, 0.05);
@@ -401,6 +459,11 @@
             color: #fff;
             font-size: 14px;
             outline: none;
+        }
+
+        select.input-control option {
+            background: #150d1c;
+            color: #fff;
         }
 
         .input-control:focus {
@@ -430,6 +493,35 @@
         .admin-only {
             display: none !important;
         }
+
+        /* Управление сеансами в админке */
+        .admin-item-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .btn-edit { background: #3a7bd5; }
+        .btn-delete { background: #e53935; }
     </style>
 </head>
 <body>
@@ -447,15 +539,28 @@
     <div class="container">
         <!-- Вкладка Афиша -->
         <div id="tab-afisha" class="tab-content active">
+            <div class="category-bar">
+                <div class="cat-chip active" onclick="filterCategory('all', this)">Все</div>
+                <div class="cat-chip" onclick="filterCategory('Фильм', this)">Фильмы</div>
+                <div class="cat-chip" onclick="filterCategory('Аниме', this)">Аниме</div>
+                <div class="cat-chip" onclick="filterCategory('Сериал', this)">Сериалы</div>
+                <div class="cat-chip" onclick="filterCategory('Мультфильм', this)">Мультфильмы</div>
+            </div>
+
             <div class="section-title">Афиша сеансов</div>
             <div class="movies-grid" id="moviesGrid"></div>
         </div>
 
-        <!-- Вкладка Билеты -->
+        <!-- Вкладка Билеты и История -->
         <div id="tab-tickets" class="tab-content">
-            <div class="section-title">Мои билеты</div>
+            <div class="section-title">Активные билеты</div>
             <div id="ticketsList">
                 <div class="empty-tickets">У вас пока нет купленных билетов.</div>
+            </div>
+
+            <div class="section-title" style="margin-top: 30px;">История билетов</div>
+            <div id="ticketsHistoryList">
+                <div class="empty-tickets">История заказов пуста.</div>
             </div>
         </div>
     </div>
@@ -526,26 +631,51 @@
     <div class="modal" id="adminModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Добавить фильм</h3>
+                <h3 id="adminFormTitle">Добавить / Изменить</h3>
                 <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
             </div>
+
+            <input type="hidden" id="admEditId">
+
             <div class="input-group">
-                <label>Название фильма</label>
+                <label>Название</label>
                 <input type="text" class="input-control" id="admTitle">
+            </div>
+            <div class="input-group">
+                <label>Категория</label>
+                <select class="input-control" id="admCategory">
+                    <option value="Фильм">Фильм</option>
+                    <option value="Аниме">Аниме</option>
+                    <option value="Сериал">Сериал</option>
+                    <option value="Мультфильм">Мультфильм</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Статус в плакате</label>
+                <select class="input-control" id="admStatus">
+                    <option value="В прокате">В прокате</option>
+                    <option value="Анонсировано">Анонсировано</option>
+                    <option value="Переписка">Переписка</option>
+                    <option value="Завершено">Завершено</option>
+                </select>
             </div>
             <div class="input-group">
                 <label>Ссылка на постер</label>
                 <input type="text" class="input-control" id="admPoster">
             </div>
             <div class="input-group">
-                <label>Время / Время сеансов</label>
+                <label>Время / Сеансы</label>
                 <input type="text" class="input-control" id="admTime" placeholder="18:00, 21:00">
             </div>
             <div class="input-group">
                 <label>Цена билета (₽)</label>
                 <input type="number" class="input-control" id="admPrice">
             </div>
-            <button class="btn-main" onclick="addMovieFromAdmin()">Опубликовать</button>
+
+            <button class="btn-main" onclick="saveMovieFromAdmin()">Сохранить</button>
+
+            <div class="section-title" style="margin-top: 25px;">Существующие сеансы</div>
+            <div id="adminMoviesList"></div>
         </div>
     </div>
 
@@ -553,20 +683,20 @@
         const tg = window.Telegram?.WebApp;
         if (tg) tg.expand();
 
-        // Администраторы (регистронезависимо, с поддержкой и без @)
         const ADMINS = ["fuckvskrytiye", "polomad"]; 
         
         let moviesData = [
-            { id: 1, title: "Матрица: Воскрешение", time: "19:00", price: 400, poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500" },
-            { id: 2, title: "Дюна: Часть Вторая", time: "21:30", price: 500, poster: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500" }
+            { id: 1, title: "Матрица: Воскрешение", category: "Фильм", status: "В прокате", time: "19:00", price: 400, poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500" },
+            { id: 2, title: "Унесённые призраками", category: "Аниме", status: "Анонсировано", time: "21:30", price: 500, poster: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500" }
         ];
 
-        let myTickets = [];
+        let activeTickets = [];
+        let historyTickets = [];
         let selectedMovie = null;
         let selectedSeat = null;
         let currentDiscount = 0;
+        let activeCategory = "all";
 
-        // Инициализация профиля
         function initUser() {
             const user = tg?.initDataUnsafe?.user;
             const userNameEl = document.getElementById("userName");
@@ -584,7 +714,6 @@
             }
         }
 
-        // Переключение между вкладками «Афиша» и «Билеты»
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -597,12 +726,22 @@
             }
         }
 
-        // Рендер афиши
+        function filterCategory(cat, element) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-chip').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            renderMovies();
+        }
+
         function renderMovies() {
             const grid = document.getElementById("moviesGrid");
             grid.innerHTML = "";
 
-            moviesData.forEach(movie => {
+            const filtered = activeCategory === "all" 
+                ? moviesData 
+                : moviesData.filter(m => m.category === activeCategory);
+
+            filtered.forEach(movie => {
                 const card = document.createElement("div");
                 card.className = "movie-card";
                 card.onclick = () => openBooking(movie);
@@ -610,8 +749,10 @@
                     <div class="poster-wrapper">
                         <img class="poster-img" src="${movie.poster}" alt="${movie.title}">
                         <div class="badge">${movie.time}</div>
+                        <div class="status-tag">${movie.status || "В прокате"}</div>
                     </div>
                     <div class="movie-info">
+                        <div class="movie-category-label">${movie.category || "Фильм"}</div>
                         <div class="movie-title">${movie.title}</div>
                         <div class="movie-meta">Зал 1</div>
                         <div class="price-btn">${movie.price} ₽</div>
@@ -621,30 +762,52 @@
             });
         }
 
-        // Рендер купленных билетов
         function renderTickets() {
-            const container = document.getElementById("ticketsList");
-            if (myTickets.length === 0) {
-                container.innerHTML = `<div class="empty-tickets">У вас пока нет купленных билетов.</div>`;
-                return;
+            const activeContainer = document.getElementById("ticketsList");
+            const historyContainer = document.getElementById("ticketsHistoryList");
+
+            // Активные билеты
+            if (activeTickets.length === 0) {
+                activeContainer.innerHTML = `<div class="empty-tickets">У вас пока нет активных билетов.</div>`;
+            } else {
+                activeContainer.innerHTML = "";
+                activeTickets.forEach((t, i) => {
+                    const card = document.createElement("div");
+                    card.className = "ticket-card";
+                    card.innerHTML = `
+                        <div>
+                            <div class="ticket-title">${t.movie}</div>
+                            <div class="ticket-details">Сеанс: ${t.time} | Ряд: ${t.row}, Место: ${t.seat}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; color:var(--pink-light);">${t.price}</div>
+                        </div>
+                    `;
+                    activeContainer.appendChild(card);
+                });
             }
 
-            container.innerHTML = "";
-            myTickets.forEach(t => {
-                const card = document.createElement("div");
-                card.className = "ticket-card";
-                card.innerHTML = `
-                    <div>
-                        <div class="ticket-title">${t.movie}</div>
-                        <div class="ticket-details">Сеанс: ${t.time} | Ряд: ${t.row}, Место: ${t.seat}</div>
-                    </div>
-                    <div style="font-weight:700; color:var(--pink-light);">${t.price}</div>
-                `;
-                container.appendChild(card);
-            });
+            // История купленных билетов
+            if (historyTickets.length === 0) {
+                historyContainer.innerHTML = `<div class="empty-tickets">История заказов пуста.</div>`;
+            } else {
+                historyContainer.innerHTML = "";
+                historyTickets.forEach(t => {
+                    const card = document.createElement("div");
+                    card.className = "ticket-card";
+                    card.style.opacity = "0.7";
+                    card.innerHTML = `
+                        <div>
+                            <div class="ticket-title">${t.movie} (Оплачено)</div>
+                            <div class="ticket-details">Сеанс: ${t.time} | Ряд: ${t.row}, Место: ${t.seat}</div>
+                        </div>
+                        <div style="font-weight:700; color:var(--text-sub);">${t.price}</div>
+                    `;
+                    historyContainer.appendChild(card);
+                });
+            }
         }
 
-        // Выбор места
         function openBooking(movie) {
             selectedMovie = movie;
             selectedSeat = null;
@@ -734,7 +897,8 @@
                 price: priceText
             };
 
-            myTickets.push(ticketData);
+            activeTickets.push(ticketData);
+            historyTickets.push(ticketData);
 
             if (tg) {
                 tg.sendData(JSON.stringify(ticketData));
@@ -744,30 +908,96 @@
             }
         }
 
-        // Управление модалками
-        function openPromoModal() {
-            document.getElementById("promoModal").classList.add("active");
-        }
-
+        // Админка: Управление каталогом
         function openAdminModal() {
+            resetAdminForm();
+            renderAdminMoviesList();
             document.getElementById("adminModal").classList.add("active");
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove("active");
+        function renderAdminMoviesList() {
+            const list = document.getElementById("adminMoviesList");
+            list.innerHTML = "";
+
+            moviesData.forEach(m => {
+                const card = document.createElement("div");
+                card.className = "admin-item-card";
+                card.innerHTML = `
+                    <div>
+                        <div style="font-weight:600; font-size:13px;">${m.title}</div>
+                        <div style="font-size:11px; color:var(--text-sub);">${m.category} | ${m.status} | ${m.price}₽</div>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-sm btn-edit" onclick="editMovie(${m.id})">Изм.</button>
+                        <button class="btn-sm btn-delete" onclick="deleteMovie(${m.id})">Уд.</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
         }
 
-        function addMovieFromAdmin() {
+        function saveMovieFromAdmin() {
+            const editId = document.getElementById("admEditId").value;
             const title = document.getElementById("admTitle").value;
+            const category = document.getElementById("admCategory").value;
+            const status = document.getElementById("admStatus").value;
             const poster = document.getElementById("admPoster").value || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500";
             const time = document.getElementById("admTime").value || "20:00";
             const price = Number(document.getElementById("admPrice").value) || 350;
 
             if (!title) return alert("Введите название");
 
-            moviesData.push({ id: Date.now(), title, poster, time, price });
+            if (editId) {
+                // Редактирование
+                const index = moviesData.findIndex(m => m.id == editId);
+                if (index !== -1) {
+                    moviesData[index] = { id: Number(editId), title, category, status, poster, time, price };
+                }
+            } else {
+                // Добавление
+                moviesData.push({ id: Date.now(), title, category, status, poster, time, price });
+            }
+
             renderMovies();
-            closeModal("adminModal");
+            renderAdminMoviesList();
+            resetAdminForm();
+        }
+
+        function editMovie(id) {
+            const movie = moviesData.find(m => m.id === id);
+            if (!movie) return;
+
+            document.getElementById("admEditId").value = movie.id;
+            document.getElementById("admTitle").value = movie.title;
+            document.getElementById("admCategory").value = movie.category || "Фильм";
+            document.getElementById("admStatus").value = movie.status || "В прокате";
+            document.getElementById("admPoster").value = movie.poster;
+            document.getElementById("admTime").value = movie.time;
+            document.getElementById("admPrice").value = movie.price;
+        }
+
+        function deleteMovie(id) {
+            if (confirm("Удалить этот сеанс?")) {
+                moviesData = moviesData.filter(m => m.id !== id);
+                renderMovies();
+                renderAdminMoviesList();
+            }
+        }
+
+        function resetAdminForm() {
+            document.getElementById("admEditId").value = "";
+            document.getElementById("admTitle").value = "";
+            document.getElementById("admPoster").value = "";
+            document.getElementById("admTime").value = "";
+            document.getElementById("admPrice").value = "";
+        }
+
+        function openPromoModal() {
+            document.getElementById("promoModal").classList.add("active");
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove("active");
         }
 
         // Инициализация
