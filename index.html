@@ -1,172 +1,682 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Сакура Кинотеатр</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body { font-family: sans-serif; background: #1a1a1a; color: #fff; margin: 0; padding: 15px; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .btn { background: #ff4757; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-    .btn-promo { background: #2ed573; }
-    .card { background: #2f3542; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
-    .modal-content { background: #2f3542; padding: 20px; border-radius: 10px; width: 80%; max-width: 400px; }
-    input, select { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
-    .admin-section { border-top: 2px solid #57606f; margin-top: 25px; padding-top: 15px; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; background: #57606f; padding: 8px; margin-bottom: 5px; border-radius: 4px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Кинотеатр</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f0a14;
+            --card-bg: rgba(255, 105, 180, 0.05);
+            --card-border: rgba(255, 105, 180, 0.18);
+            --text-main: #ffffff;
+            --text-sub: #b3a0b5;
+            --accent-color: #ff2a85;
+            --accent-hover: #e01b6e;
+            --pink-glow: rgba(255, 42, 133, 0.35);
+            --pink-light: #ff85c0;
+            --glass-bg: rgba(25, 15, 30, 0.75);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 90px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 42, 133, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 133, 192, 0.08) 0%, transparent 40%);
+        }
+
+        header {
+            padding: 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--pink-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            box-shadow: 0 0 12px var(--pink-glow);
+        }
+
+        .user-info h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .user-info p {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .container {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 20px 0 12px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 14px;
+        }
+
+        .movie-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+        }
+
+        .movie-card:active {
+            transform: scale(0.97);
+        }
+
+        .poster-wrapper {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            background: #1a1020;
+        }
+
+        .poster-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(15, 10, 20, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--pink-light);
+            border: 1px solid var(--card-border);
+        }
+
+        .movie-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .movie-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .movie-meta {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+        }
+
+        .price-btn {
+            margin-top: auto;
+            background: rgba(255, 42, 133, 0.15);
+            color: var(--pink-light);
+            border: 1px solid rgba(255, 42, 133, 0.3);
+            padding: 8px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Навигация снизу */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 16px;
+            z-index: 99;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-sub);
+            font-size: 11px;
+            text-decoration: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 25%;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+
+        .nav-icon {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        /* Модальные окна */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 5, 15, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #150d1c;
+            border: 1px solid var(--card-border);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 20px;
+            animation: slideUp 0.25s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* Сетка мест */
+        .screen-target {
+            width: 80%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            box-shadow: 0 0 15px var(--accent-color);
+            margin: 15px auto 25px;
+            border-radius: 2px;
+        }
+
+        .seats-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .seat-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .seat {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .seat.selected {
+            background: var(--accent-color);
+            border-color: var(--pink-light);
+            box-shadow: 0 0 10px var(--pink-glow);
+            color: #fff;
+        }
+
+        .seat.occupied {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: transparent;
+            color: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent-color), #d01560);
+            border: none;
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--pink-glow);
+        }
+
+        .btn-main:disabled {
+            opacity: 0.5;
+            box-shadow: none;
+        }
+
+        /* Формы и Инпуты */
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-control:focus {
+            border-color: var(--accent-color);
+        }
+
+        .promo-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .promo-box input {
+            flex: 1;
+        }
+
+        .promo-box button {
+            padding: 0 16px;
+            background: rgba(255, 42, 133, 0.2);
+            border: 1px solid var(--card-border);
+            color: var(--pink-light);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .admin-only {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- ХЕДЕР И КНОПКА ПРОМОКОДЫ -->
-  <div class="header">
-    <h2>🍿 Сакура Кино</h2>
-    <button class="btn btn-promo" onclick="openPromoModal()">🏷️ Промокод</button>
-  </div>
-
-  <!-- СПИСОК СЕАНСОВ / БИЛЕТОВ -->
-  <div id="movies-list"></div>
-
-  <!-- АДМИН ПАНЕЛЬ (Управление сеансами/билетами) -->
-  <div id="admin-panel" class="admin-section" style="display: none;">
-    <h3>⚙️ Админ-панель (Управление)</h3>
-    <div id="admin-movies-list"></div>
-  </div>
-
-  <!-- МОДАЛЬНОЕ ОКНО ПРОМОКОДОВ -->
-  <div id="promo-modal" class="modal">
-    <div class="modal-content">
-      <h3>Ввести промокод</h3>
-      <input type="text" id="promo-input" placeholder="Введите промокод (напр. сакура)">
-      <button class="btn btn-promo" onclick="applyPromo()">Применить</button>
-      <button class="btn" style="background:#747d8c; margin-top:5px;" onclick="closePromoModal()">Закрыть</button>
-      <p id="promo-msg" style="font-size: 14px; margin-top: 10px;"></p>
-    </div>
-  </div>
-
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    // Список доступных промокодов
-    const PROMOCODES = {
-      "сакура": 0.10,   // 10% скидка
-      "психолог": 0.30 // 30% скидка
-    };
-
-    let activeDiscount = 0; // Текущая скидка
-    let isAdmin = false;
-
-    // Начальные данные сеансов
-    let movies = [
-      { id: 1, title: "Человек-паук", session: "18:00", price: 300 },
-      { id: 2, title: "Бэтмен", session: "21:00", price: 400 }
-    ];
-
-    // Проверка прав админа при загрузке
-    const adminUsernames = ["siqhnn", "fuckvskrytiye", "polomad"];
-    const currentUser = tg.initDataUnsafe?.user?.username?.toLowerCase();
-    if (adminUsernames.includes(currentUser)) {
-      isAdmin = true;
-      document.getElementById('admin-panel').style.display = 'block';
-    }
-
-    function render() {
-      // Отрисовка для пользователей
-      const list = document.getElementById('movies-list');
-      list.innerHTML = '';
-      movies.forEach(m => {
-        const finalPrice = Math.round(m.price * (1 - activeDiscount));
-        const priceText = activeDiscount > 0 
-          ? `<s>${m.price} ₽</s> <b>${finalPrice} ₽</b>` 
-          : `${m.price} ₽`;
-
-        list.innerHTML += `
-          <div class="card">
-            <h4>${m.title}</h4>
-            <p>Время: ${m.session}</p>
-            <p>Цена: ${priceText}</p>
-            <button class="btn" onclick="buyTicket(${m.id}, ${finalPrice})">Забронировать</button>
-          </div>
-        `;
-      });
-
-      // Отрисовка админки (Управление)
-      if (isAdmin) {
-        const adminList = document.getElementById('admin-movies-list');
-        adminList.innerHTML = '';
-        movies.forEach(m => {
-          adminList.innerHTML += `
-            <div class="item-row">
-              <span>${m.title} (${m.session}) - ${m.price}₽</span>
-              <div>
-                <button class="btn" style="background:#eccc68;" onclick="editMovie(${m.id})">✏️</button>
-                <button class="btn" style="background:#ff4757;" onclick="deleteMovie(${m.id})">🗑️</button>
-              </div>
+    <header>
+        <div class="user-profile">
+            <div class="avatar" id="userAvatar">U</div>
+            <div class="user-info">
+                <h3 id="userName">Пользователь</h3>
+                <p id="userStatus">Клиент</p>
             </div>
-          `;
-        });
-      }
-    }
+        </div>
+    </header>
 
-    // Промокоды
-    function openPromoModal() { document.getElementById('promo-modal').style.display = 'flex'; }
-    function closePromoModal() { document.getElementById('promo-modal').style.display = 'none'; }
+    <div class="container">
+        <div class="section-title">Афиша сеансов</div>
+        <div class="movies-grid" id="moviesGrid"></div>
+    </div>
 
-    function applyPromo() {
-      const input = document.getElementById('promo-input').value.trim().toLowerCase();
-      const msg = document.getElementById('promo-msg');
+    <!-- Навигация -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('afisha')">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4h-2l2 4H9L7 4H5L3 8v12h18V4h-3z"/></svg>
+            Афиша
+        </button>
+        <button class="nav-item" onclick="openPromoModal()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+            Промокоды
+        </button>
+        <button class="nav-item" onclick="switchTab('tickets')">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M22 10V6c0-1.11-.9-2-2-2H4c-1.1 0-1.99.89-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-2-1.46c-1.19.69-2 1.99-2 3.46s.81 2.77 2 3.46V18H4v-2.54c1.19-.69 2-1.99 2-3.46d0-1.47-.81-2.77-2-3.46V6h16v2.54z"/></svg>
+            Билеты
+        </button>
+        <button class="nav-item admin-only" id="adminTabBtn" onclick="openAdminModal()">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            Админ
+        </button>
+    </nav>
 
-      if (PROMOCODES[input]) {
-        activeDiscount = PROMOCODES[input];
-        msg.style.color = '#2ed573';
-        msg.innerText = `Промокод применен! Скидка ${activeDiscount * 100}%`;
-        render();
-        setTimeout(closePromoModal, 1200);
-      } else {
-        msg.style.color = '#ff4757';
-        msg.innerText = 'Неверный промокод';
-      }
-    }
+    <!-- Модалка Выбора Мест -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalMovieTitle">Выбор места</h3>
+                <button class="close-btn" onclick="closeModal('bookingModal')">✕</button>
+            </div>
+            <div class="screen-target"></div>
+            <div class="seats-grid" id="seatsGrid"></div>
+            <div style="margin-top: 15px;">
+                <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 8px;">Есть промокод?</p>
+                <div class="promo-box">
+                    <input type="text" class="input-control" id="seatPromoInput" placeholder="Введите код">
+                    <button onclick="applySeatPromo()">ОК</button>
+                </div>
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-size: 12px; color: var(--text-sub);">Итого:</span>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--pink-light);" id="totalPrice">0 ₽</div>
+                </div>
+                <button class="btn-main" style="width: auto; padding: 10px 24px;" id="payBtn" disabled onclick="confirmBooking()">Оплатить</button>
+            </div>
+        </div>
+    </div>
 
-    // Админ-функции: Редактирование и Удаление
-    function deleteMovie(id) {
-      movies = movies.filter(m => m.id !== id);
-      render();
-    }
+    <!-- Модалка Промокодов -->
+    <div class="modal" id="promoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Промокоды</h3>
+                <button class="close-btn" onclick="closeModal('promoModal')">✕</button>
+            </div>
+            <div class="input-group">
+                <label>Активация скидки</label>
+                <input type="text" class="input-control" id="mainPromoInput" placeholder="Введи промокод..." style="text-transform: uppercase;">
+            </div>
+            <button class="btn-main" onclick="activateMainPromo()">Активировать</button>
+            <div id="promoStatus" style="margin-top: 12px; font-size: 13px; text-align: center;"></div>
+        </div>
+    </div>
 
-    function editMovie(id) {
-      const movie = movies.find(m => m.id === id);
-      if (!movie) return;
+    <!-- Модалка Админки -->
+    <div class="modal" id="adminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить фильм</h3>
+                <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
+            </div>
+            <div class="input-group">
+                <label>Название фильма</label>
+                <input type="text" class="input-control" id="admTitle">
+            </div>
+            <div class="input-group">
+                <label>Ссылка на постер</label>
+                <input type="text" class="input-control" id="admPoster">
+            </div>
+            <div class="input-group">
+                <label>Время / Время сеансов</label>
+                <input type="text" class="input-control" id="admTime" placeholder="18:00, 21:00">
+            </div>
+            <div class="input-group">
+                <label>Цена билета (₽)</label>
+                <input type="number" class="input-control" id="admPrice">
+            </div>
+            <button class="btn-main" onclick="addMovieFromAdmin()">Опубликовать</button>
+        </div>
+    </div>
 
-      const newTitle = prompt("Новое название:", movie.title);
-      const newSession = prompt("Новое время:", movie.session);
-      const newPrice = prompt("Новая цена:", movie.price);
+    <script>
+        const tg = window.Telegram?.WebApp;
+        if (tg) tg.expand();
 
-      if (newTitle && newSession && newPrice) {
-        movie.title = newTitle;
-        movie.session = newSession;
-        movie.price = Number(newPrice);
-        render();
-      }
-    }
+        // Администраторы
+        const ADMINS = ["admin", "owner"]; 
+        
+        let moviesData = [
+            { id: 1, title: "Матрица: Воскрешение", time: "19:00", price: 400, poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500" },
+            { id: 2, title: "Дюна: Часть Вторая", time: "21:30", price: 500, poster: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500" }
+        ];
 
-    function buyTicket(id, price) {
-      const movie = movies.find(m => m.id === id);
-      tg.sendData(JSON.stringify({
-        action: "pay",
-        movie: movie.title,
-        session: movie.session,
-        price: price,
-        row: 3,
-        seat: 12,
-        method: "Онлайн"
-      }));
-    }
+        let selectedMovie = null;
+        let selectedSeat = null;
+        let currentDiscount = 0;
 
-    render();
-  </script>
+        // Инициализация профиля
+        function initUser() {
+            const user = tg?.initDataUnsafe?.user;
+            const userNameEl = document.getElementById("userName");
+            const avatarEl = document.getElementById("userAvatar");
+
+            if (user) {
+                userNameEl.innerText = user.first_name || "Пользователь";
+                avatarEl.innerText = (user.first_name || "U")[0].toUpperCase();
+
+                if (ADMINS.includes(user.username)) {
+                    document.getElementById("userStatus").innerText = "Администратор";
+                    document.querySelectorAll(".admin-only").forEach(el => el.style.display = "flex");
+                }
+            }
+        }
+
+        // Рендер афиши
+        function renderMovies() {
+            const grid = document.getElementById("moviesGrid");
+            grid.innerHTML = "";
+
+            moviesData.forEach(movie => {
+                const card = document.createElement("div");
+                card.className = "movie-card";
+                card.onclick = () => openBooking(movie);
+                card.innerHTML = `
+                    <div class="poster-wrapper">
+                        <img class="poster-img" src="${movie.poster}" alt="${movie.title}">
+                        <div class="badge">${movie.time}</div>
+                    </div>
+                    <div class="movie-info">
+                        <div class="movie-title">${movie.title}</div>
+                        <div class="movie-meta">Зал 1</div>
+                        <div class="price-btn">${movie.price} ₽</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Выбор места
+        function openBooking(movie) {
+            selectedMovie = movie;
+            selectedSeat = null;
+            document.getElementById("modalMovieTitle").innerText = movie.title;
+            
+            const grid = document.getElementById("seatsGrid");
+            grid.innerHTML = "";
+
+            for (let r = 1; r <= 4; r++) {
+                const row = document.createElement("div");
+                row.className = "seat-row";
+                for (let s = 1; s <= 5; s++) {
+                    const seat = document.createElement("div");
+                    seat.className = "seat";
+                    seat.innerText = `${r}-${s}`;
+                    seat.onclick = () => selectSeat(seat, r, s);
+                    row.appendChild(seat);
+                }
+                grid.appendChild(row);
+            }
+
+            updateTotalPrice();
+            document.getElementById("bookingModal").classList.add("active");
+        }
+
+        function selectSeat(element, row, seat) {
+            document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected"));
+            element.classList.add("selected");
+            selectedSeat = { row, seat };
+            document.getElementById("payBtn").disabled = false;
+            updateTotalPrice();
+        }
+
+        function updateTotalPrice() {
+            if (!selectedMovie) return;
+            let finalPrice = selectedMovie.price;
+            if (currentDiscount > 0) {
+                finalPrice = finalPrice - (finalPrice * (currentDiscount / 100));
+            }
+            document.getElementById("totalPrice").innerText = `${Math.round(finalPrice)} ₽`;
+        }
+
+        function applySeatPromo() {
+            const code = document.getElementById("seatPromoInput").value.trim().toUpperCase();
+            if (code === "PINK20" || code === "SALE") {
+                currentDiscount = 20;
+                alert("Промокод применен! Скидка 20%");
+            } else {
+                alert("Недействительный промокод");
+            }
+            updateTotalPrice();
+        }
+
+        function activateMainPromo() {
+            const code = document.getElementById("mainPromoInput").value.trim().toUpperCase();
+            const status = document.getElementById("promoStatus");
+            if (code === "PINK20" || code === "SALE") {
+                currentDiscount = 20;
+                status.style.color = "var(--pink-light)";
+                status.innerText = "Промокод на скидку 20% успешно активирован!";
+            } else {
+                status.style.color = "#ff4d4d";
+                status.innerText = "Ошибка: такого промокода нет.";
+            }
+        }
+
+        function confirmBooking() {
+            if (!selectedMovie || !selectedSeat) return;
+
+            const payload = {
+                movie: selectedMovie.title,
+                row: selectedSeat.row,
+                seat: selectedSeat.seat,
+                price: document.getElementById("totalPrice").innerText
+            };
+
+            if (tg) {
+                tg.sendData(JSON.stringify(payload));
+            } else {
+                alert(`Успешно забронировано: ${payload.movie}, Ряд ${payload.row}, Место ${payload.seat}`);
+                closeModal("bookingModal");
+            }
+        }
+
+        // Управление модалками
+        function openPromoModal() {
+            document.getElementById("promoModal").classList.add("active");
+        }
+
+        function openAdminModal() {
+            document.getElementById("adminModal").classList.add("active");
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove("active");
+        }
+
+        function addMovieFromAdmin() {
+            const title = document.getElementById("admTitle").value;
+            const poster = document.getElementById("admPoster").value || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500";
+            const time = document.getElementById("admTime").value || "20:00";
+            const price = Number(document.getElementById("admPrice").value) || 350;
+
+            if (!title) return alert("Введите название");
+
+            moviesData.push({ id: Date.now(), title, poster, time, price });
+            renderMovies();
+            closeModal("adminModal");
+        }
+
+        function switchTab(tab) {
+            if (tab === 'afisha') {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        // Инициализация
+        initUser();
+        renderMovies();
+    </script>
 </body>
 </html>
