@@ -15,7 +15,6 @@
             --border-hover: rgba(255, 46, 140, 0.45);
             --accent: #ff2e8c;
             --accent-glow: rgba(255, 46, 140, 0.35);
-            --accent-subtle: #9e1b58;
             --text-main: #fce8f3;
             --text-muted: #b886a4;
             --success: #10b981;
@@ -27,7 +26,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
@@ -35,14 +34,38 @@
             min-height: 100vh;
         }
 
-        /* Шапка */
+        /* Анимация запуска */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.4s ease;
+        }
+
+        .loader-ring {
+            width: 42px;
+            height: 42px;
+            border: 3px solid var(--surface);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .header-title {
             font-size: 20px;
             font-weight: 700;
-            letter-spacing: -0.3px;
             margin: 0 0 18px 0;
-            color: var(--text-main);
-            text-align: left;
         }
 
         /* Категории */
@@ -62,11 +85,10 @@
             padding: 8px 16px;
             border-radius: 10px;
             font-size: 13px;
-            font-weight: 500;
             color: var(--text-muted);
             white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
 
         .cat-chip.active {
@@ -76,46 +98,77 @@
             box-shadow: 0 0 12px var(--accent-glow);
         }
 
-        /* Сетка фильмов */
+        /* Карточки фильмов */
         .catalog-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
 
         .movie-card {
             background: var(--surface-card);
             border-radius: 14px;
-            padding: 14px;
             border: 1px solid var(--border);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.15s ease, border-color 0.2s ease;
         }
 
-        .movie-card:active {
-            transform: scale(0.98);
+        .poster-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: #200817;
+        }
+
+        .poster-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .age-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 5, 11, 0.85);
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .movie-info {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .movie-title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 4px;
-            color: var(--text-main);
+            font-size: 16px;
+            font-weight: 700;
         }
 
-        .movie-meta {
+        .movie-meta-text {
             font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .movie-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 8px;
         }
 
         .movie-price {
-            color: var(--accent);
+            font-size: 16px;
             font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 12px;
+            color: var(--accent);
         }
 
         /* Кнопки */
@@ -123,18 +176,12 @@
             background: var(--accent);
             color: #ffffff;
             border: none;
-            padding: 10px 14px;
-            border-radius: 9px;
-            cursor: pointer;
+            padding: 9px 16px;
+            border-radius: 8px;
             font-weight: 600;
             font-size: 13px;
-            width: 100%;
-            transition: background 0.2s, box-shadow 0.2s;
+            cursor: pointer;
             box-shadow: 0 2px 10px var(--accent-glow);
-        }
-
-        .btn:active {
-            background: #e02679;
         }
 
         .btn-secondary {
@@ -144,16 +191,11 @@
             box-shadow: none;
         }
 
-        .btn-secondary:active {
-            background: #25101e;
-        }
-
         .btn-success {
             background: var(--success);
             box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25);
         }
 
-        /* Фиксированная админ-панель */
         .admin-footer {
             display: none;
             position: fixed;
@@ -165,12 +207,12 @@
             backdrop-filter: blur(12px);
         }
 
-        /* Модальные окна */
+        /* Модалки */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(5, 2, 4, 0.82);
+            background: rgba(5, 2, 4, 0.85);
             padding: 16px;
             z-index: 999;
             align-items: center;
@@ -183,25 +225,17 @@
             padding: 20px;
             border-radius: 16px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             border: 1px solid var(--border-hover);
             max-height: 88vh;
             overflow-y: auto;
-            box-shadow: 0 0 30px rgba(255, 46, 140, 0.15);
         }
 
-        .modal-title {
-            margin: 0 0 16px 0;
-            font-size: 17px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        /* Переключатель вкладок админки */
+        /* Админ вкладки */
         .admin-tabs {
             display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
+            gap: 4px;
+            margin-bottom: 14px;
             background: var(--surface);
             padding: 4px;
             border-radius: 10px;
@@ -210,156 +244,80 @@
 
         .admin-tab {
             flex: 1;
-            padding: 8px;
+            padding: 7px 2px;
             border: none;
             border-radius: 7px;
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             text-align: center;
             background: transparent;
-            transition: all 0.2s;
         }
 
         .admin-tab.active {
             background: var(--accent);
             color: #fff;
-            box-shadow: 0 2px 8px var(--accent-glow);
         }
 
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Поля ввода */
         label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
-            margin-bottom: 4px;
-            margin-top: 10px;
+            margin-top: 8px;
+            margin-bottom: 3px;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
-            padding: 10px 12px;
+            padding: 9px 11px;
             background: var(--surface);
             border: 1px solid var(--border);
             color: var(--text-main);
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
-            transition: border-color 0.2s;
         }
 
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
+        /* Схема зала */
+        .screen-container { text-align: center; margin: 16px 0; }
+        .screen { background: var(--accent); height: 2px; width: 80%; margin: 0 auto 4px auto; box-shadow: 0 0 10px var(--accent); }
+        .screen-text { font-size: 10px; color: var(--text-muted); letter-spacing: 2px; }
 
-        /* Экран и места */
-        .screen-container {
-            text-align: center;
-            margin: 16px 0 20px 0;
-        }
-
-        .screen {
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            height: 2px;
-            width: 80%;
-            margin: 0 auto 6px auto;
-            box-shadow: 0 0 10px var(--accent);
-        }
-
-        .screen-text {
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .seats-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .seat-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .row-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            width: 40px;
-        }
-
+        .seats-grid { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-bottom: 16px; }
+        .seat-row { display: flex; gap: 8px; align-items: center; }
+        .row-label { font-size: 11px; color: var(--text-muted); width: 40px; }
         .seat {
-            width: 32px;
-            height: 32px;
-            background: var(--surface);
-            border-radius: 7px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            transition: all 0.15s ease;
+            width: 32px; height: 32px; background: var(--surface); border-radius: 7px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            font-weight: 600; cursor: pointer; border: 1px solid var(--border);
         }
+        .seat.selected { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 0 10px var(--accent-glow); }
 
-        .seat.selected {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        /* Способы оплаты */
-        .payment-options {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: 14px 0 18px 0;
-        }
-
+        /* Оплата */
         .pay-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            padding: 12px 14px;
-            border-radius: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-
-        .pay-card.selected {
-            border-color: var(--accent);
-            background: rgba(255, 46, 140, 0.08);
-            box-shadow: inset 0 0 12px rgba(255, 46, 140, 0.15);
-        }
-
-        .pay-title {
-            font-weight: 500;
-            font-size: 13px;
-        }
-
-        .pay-badge {
-            font-size: 11px;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
+        .pay-card.selected { border-color: var(--accent); background: rgba(255, 46, 140, 0.08); }
     </style>
 </head>
 <body>
+
+    <!-- Анимация запуска -->
+    <div id="splash-screen">
+        <div class="loader-ring"></div>
+    </div>
 
     <h2 class="header-title">Афиша сеансов</h2>
 
@@ -373,76 +331,79 @@
     <div class="catalog-grid" id="movies-list"></div>
 
     <div class="admin-footer" id="adminPanel">
-        <button class="btn btn-secondary" onclick="openAdminModal()">Панель управления</button>
+        <button class="btn btn-secondary" style="width: 100%;" onclick="openAdminModal()">Панель управления</button>
     </div>
 
-    <!-- Модальное окно админки -->
+    <!-- Модальное окно Админки -->
     <div class="modal-overlay" id="adminModal">
         <div class="modal-body">
-            <h3 class="modal-title">Администрирование</h3>
+            <h3 style="margin: 0 0 14px 0; font-size: 16px; text-align: center;">Управление</h3>
             
             <div class="admin-tabs">
-                <div class="admin-tab active" onclick="switchAdminTab('tab-add-movie', this)">Новый сеанс</div>
-                <div class="admin-tab" onclick="switchAdminTab('tab-free-ticket', this)">Выдать билет</div>
+                <div class="admin-tab active" onclick="switchAdminTab('tab-add', this)">Создать</div>
+                <div class="admin-tab" onclick="switchAdminTab('tab-edit', this)">Редактор</div>
+                <div class="admin-tab" onclick="switchAdminTab('tab-ticket', this)">Билет</div>
             </div>
 
-            <!-- Вкладка 1: Назначение фильма -->
-            <div class="tab-content active" id="tab-add-movie">
+            <!-- Вкладка 1: Создание -->
+            <div class="tab-content active" id="tab-add">
                 <label>Название</label>
-                <input type="text" id="m-title" placeholder="Астрал 5">
-
-                <label>Категория</label>
-                <select id="m-category">
-                    <option value="films">Фильмы</option>
-                    <option value="series">Сериалы</option>
-                    <option value="anime">Аниме</option>
-                </select>
-
-                <label>Жанр</label>
-                <input type="text" id="m-genre" placeholder="Ужасы">
-
+                <input type="text" id="add-title" placeholder="Астрал 5">
+                <label>Обложка (URL картинки)</label>
+                <input type="text" id="add-poster" placeholder="https://...">
+                <label>Режиссёр / Автор</label>
+                <input type="text" id="add-director" placeholder="Патрик Уилсон">
+                <label>Возраст</label>
+                <input type="text" id="add-age" placeholder="18+">
+                <label>Дата и время сеанса</label>
+                <input type="text" id="add-session" placeholder="Сегодня в 21:00">
+                <label>Описание</label>
+                <textarea id="add-desc" rows="2" placeholder="Краткое описание фильма..."></textarea>
                 <label>Цена (руб)</label>
-                <input type="number" id="m-price" placeholder="350">
-
-                <button class="btn" style="margin-top: 14px;" onclick="addMovie()">Добавить в расписание</button>
+                <input type="number" id="add-price" placeholder="350">
+                <button class="btn" style="width:100%; margin-top:12px;" onclick="createMovie()">Опубликовать</button>
             </div>
 
-            <!-- Вкладка 2: Выдача бесплатного билета -->
-            <div class="tab-content" id="tab-free-ticket">
+            <!-- Вкладка 2: Редактирование и перенос сеанса -->
+            <div class="tab-content" id="tab-edit">
+                <label>Выберите фильм для редактирования</label>
+                <select id="edit-select" onchange="loadMovieToEdit()"></select>
+                
+                <label>Название</label>
+                <input type="text" id="edit-title">
+                <label>Перенос сеанса (Дата/Время)</label>
+                <input type="text" id="edit-session">
+                <label>Режиссёр</label>
+                <input type="text" id="edit-director">
+                <label>Возрастное ограничение</label>
+                <input type="text" id="edit-age">
+                <label>URL обложки</label>
+                <input type="text" id="edit-poster">
+                <label>Цена (руб)</label>
+                <input type="number" id="edit-price">
+                <button class="btn" style="width:100%; margin-top:12px;" onclick="saveMovieEdit()">Сохранить изменения</button>
+            </div>
+
+            <!-- Вкладка 3: Выдача билета -->
+            <div class="tab-content" id="tab-ticket">
                 <label>Фильм</label>
-                <select id="free-movie-select"></select>
-
-                <label>Сеанс</label>
-                <select id="free-session-time">
-                    <option value="Сегодня в 18:00">Сегодня в 18:00</option>
-                    <option value="Сегодня в 21:00">Сегодня в 21:00</option>
-                    <option value="Завтра в 19:30">Завтра в 19:30</option>
-                </select>
-
+                <select id="free-select"></select>
                 <label>Ряд</label>
-                <input type="number" id="free-row" min="1" max="3" value="1">
-
+                <input type="number" id="free-row" value="1">
                 <label>Место</label>
-                <input type="number" id="free-seat" min="1" max="5" value="1">
-
-                <button class="btn btn-success" style="margin-top: 14px;" onclick="issueFreeTicket()">Сформировать билет</button>
+                <input type="number" id="free-seat" value="1">
+                <button class="btn btn-success" style="width:100%; margin-top:12px;" onclick="issueTicket()">Выдать бесплатный билет</button>
             </div>
 
-            <button class="btn btn-secondary" style="margin-top: 10px;" onclick="closeModal('adminModal')">Закрыть</button>
+            <button class="btn btn-secondary" style="width:100%; margin-top:10px;" onclick="closeModal('adminModal')">Закрыть</button>
         </div>
     </div>
 
-    <!-- Модальное окно бронирования -->
+    <!-- Модальное окно выбора мест -->
     <div class="modal-overlay" id="bookingModal">
         <div class="modal-body">
-            <h3 class="modal-title" id="book-title"></h3>
-
-            <label>Время сеанса</label>
-            <select id="session-time">
-                <option value="Сегодня в 18:00">Сегодня в 18:00</option>
-                <option value="Сегодня в 21:00">Сегодня в 21:00</option>
-                <option value="Завтра в 19:30">Завтра в 19:30</option>
-            </select>
+            <h3 id="book-title" style="margin: 0 0 10px 0; font-size: 16px; text-align: center;"></h3>
+            <div id="book-meta" style="font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 12px;"></div>
 
             <div class="screen-container">
                 <div class="screen"></div>
@@ -451,44 +412,43 @@
 
             <div class="seats-grid" id="seats-container"></div>
 
-            <div id="booking-info" style="text-align:center; font-size:12px; margin-bottom:14px; color:var(--text-muted);">
+            <div id="booking-info" style="text-align:center; font-size:12px; margin-bottom:12px; color:var(--text-muted);">
                 Выберите место
             </div>
 
-            <button class="btn" onclick="goToPayment()">Продолжить</button>
-            <button class="btn btn-secondary" style="margin-top: 8px;" onclick="closeModal('bookingModal')">Отмена</button>
+            <button class="btn" style="width:100%;" onclick="goToPayment()">Забронировать</button>
+            <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="closeModal('bookingModal')">Отмена</button>
         </div>
     </div>
 
     <!-- Модальное окно оплаты -->
     <div class="modal-overlay" id="paymentModal">
         <div class="modal-body">
-            <h3 class="modal-title">Детали оплаты</h3>
-            
-            <div id="payment-summary" style="font-size:13px; color:var(--text-muted); line-height: 1.6; margin-bottom:14px; background: var(--surface); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);"></div>
+            <h3 style="margin:0 0 12px 0; font-size:16px; text-align:center;">Оплата билета</h3>
+            <div id="payment-summary" style="font-size:12px; color:var(--text-muted); margin-bottom:12px; background:var(--surface); padding:10px; border-radius:8px; border:1px solid var(--border);"></div>
 
-            <label>Способ оплаты</label>
-            <div class="payment-options">
-                <div class="pay-card selected" onclick="selectPayment(this, 'DonationAlerts')">
-                    <span class="pay-title">DonationAlerts</span>
-                    <span class="pay-badge">Быстро</span>
+            <label>Выберите способ</label>
+            <div style="margin-bottom: 12px;">
+                <div class="pay-card selected" onclick="selectPay(this, 'DonationAlerts')">
+                    <span style="font-size:13px;">DonationAlerts</span>
+                    <span style="font-size:10px; color:var(--text-muted);">Быстро</span>
                 </div>
-                <div class="pay-card" onclick="selectPayment(this, 'Банковская карта')">
-                    <span class="pay-title">Карта / СБП</span>
-                    <span class="pay-badge">ЮKassa</span>
+                <div class="pay-card" onclick="selectPay(this, 'Банковская карта')">
+                    <span style="font-size:13px;">Карта / СБП</span>
+                    <span style="font-size:10px; color:var(--text-muted);">ЮKassa</span>
                 </div>
-                <div class="pay-card" onclick="selectPayment(this, 'Telegram Stars')">
-                    <span class="pay-title">Telegram Stars</span>
-                    <span class="pay-badge">Stars</span>
+                <div class="pay-card" onclick="selectPay(this, 'Telegram Stars')">
+                    <span style="font-size:13px;">Telegram Stars</span>
+                    <span style="font-size:10px; color:var(--text-muted);">Stars</span>
                 </div>
-                <div class="pay-card" onclick="selectPayment(this, 'CryptoBot')">
-                    <span class="pay-title">CryptoBot</span>
-                    <span class="pay-badge">USDT / TON</span>
+                <div class="pay-card" onclick="selectPay(this, 'CryptoBot')">
+                    <span style="font-size:13px;">CryptoBot</span>
+                    <span style="font-size:10px; color:var(--text-muted);">Crypto</span>
                 </div>
             </div>
 
-            <button class="btn btn-success" onclick="processPayment()">Перейти к оплате <span id="pay-amount"></span></button>
-            <button class="btn btn-secondary" style="margin-top: 8px;" onclick="closeModal('paymentModal')">Назад</button>
+            <button class="btn btn-success" style="width:100%;" onclick="processPayment()">Подтвердить оплату</button>
+            <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="closeModal('paymentModal')">Назад</button>
         </div>
     </div>
 
@@ -496,6 +456,15 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
+
+        // Анимация запуска
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 400);
+            }, 300);
+        });
 
         const ADMINS = ["siqhnn", "fuckvskrytiye", "polomad"];
         const user = tg.initDataUnsafe?.user;
@@ -506,8 +475,17 @@
         }
 
         let moviesData = [
-            { id: 1, title: "Астрал 5", category: "films", genre: "Ужасы", price: 350 },
-            { id: 2, title: "Атака Титанов", category: "anime", genre: "Боевик", price: 300 }
+            {
+                id: 1,
+                title: "Астрал 5",
+                category: "films",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500",
+                director: "Патрик Уилсон",
+                age: "18+",
+                session: "Сегодня в 21:00",
+                description: "Семья Ламберт снова сталкивается с темными сущностями своего прошлого.",
+                price: 350
+            }
         ];
 
         let selectedMovie = null;
@@ -523,12 +501,22 @@
                     const card = document.createElement('div');
                     card.className = 'movie-card';
                     card.innerHTML = `
-                        <div>
-                            <div class="movie-title">${m.title}</div>
-                            <div class="movie-meta">${m.genre}</div>
-                            <div class="movie-price">${m.price} ₽</div>
+                        <div class="poster-container">
+                            <img src="${m.poster}" class="poster-img" alt="poster" onerror="this.src='https://via.placeholder.com/400x200?text=No+Poster'">
+                            <div class="age-badge">${m.age}</div>
                         </div>
-                        <button class="btn" onclick="openBookingModal(${m.id})">Билеты</button>
+                        <div class="movie-info">
+                            <div class="movie-title">${m.title}</div>
+                            <div class="movie-meta-text">
+                                <b>Сеанс:</b> ${m.session}<br>
+                                <b>Режиссёр:</b> ${m.director}<br>
+                                ${m.description}
+                            </div>
+                            <div class="movie-footer">
+                                <div class="movie-price">${m.price} ₽</div>
+                                <button class="btn" onclick="openBooking(${m.id})">Выбрать место</button>
+                            </div>
+                        </div>
                     `;
                     list.appendChild(card);
                 }
@@ -549,122 +537,146 @@
         }
 
         function openAdminModal() {
-            const select = document.getElementById('free-movie-select');
-            select.innerHTML = '';
+            const editSel = document.getElementById('edit-select');
+            const freeSel = document.getElementById('free-select');
+            editSel.innerHTML = '';
+            freeSel.innerHTML = '';
+
             moviesData.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m.title;
-                opt.innerText = m.title;
-                select.appendChild(opt);
+                editSel.appendChild(new Option(m.title, m.id));
+                freeSel.appendChild(new Option(m.title, m.id));
             });
+
+            if (moviesData.length > 0) loadMovieToEdit();
             document.getElementById('adminModal').style.display = 'flex';
         }
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        function addMovie() {
-            const title = document.getElementById('m-title').value.trim();
-            const category = document.getElementById('m-category').value;
-            const genre = document.getElementById('m-genre').value.trim() || "Фильм";
-            const price = document.getElementById('m-price').value || 300;
+        function createMovie() {
+            const title = document.getElementById('add-title').value;
+            if (!title) return alert("Введите название");
 
-            if (!title) return alert("Укажите название фильма");
+            moviesData.push({
+                id: Date.now(),
+                title: title,
+                category: "films",
+                poster: document.getElementById('add-poster').value || "",
+                director: document.getElementById('add-director').value || "Не указан",
+                age: document.getElementById('add-age').value || "16+",
+                session: document.getElementById('add-session').value || "Сегодня в 18:00",
+                description: document.getElementById('add-desc').value || "",
+                price: parseInt(document.getElementById('add-price').value) || 300
+            });
 
-            moviesData.push({ id: Date.now(), title, category, genre, price });
             renderMovies();
             closeModal('adminModal');
-
-            document.getElementById('m-title').value = '';
-            document.getElementById('m-genre').value = '';
-            document.getElementById('m-price').value = '';
         }
 
-        function issueFreeTicket() {
-            const movie = document.getElementById('free-movie-select').value;
-            const session = document.getElementById('free-session-time').value;
+        function loadMovieToEdit() {
+            const id = parseInt(document.getElementById('edit-select').value);
+            const m = moviesData.find(x => x.id === id);
+            if (!m) return;
+
+            document.getElementById('edit-title').value = m.title;
+            document.getElementById('edit-session').value = m.session;
+            document.getElementById('edit-director').value = m.director;
+            document.getElementById('edit-age').value = m.age;
+            document.getElementById('edit-poster').value = m.poster;
+            document.getElementById('edit-price').value = m.price;
+        }
+
+        function saveMovieEdit() {
+            const id = parseInt(document.getElementById('edit-select').value);
+            const m = moviesData.find(x => x.id === id);
+            if (!m) return;
+
+            m.title = document.getElementById('edit-title').value;
+            m.session = document.getElementById('edit-session').value;
+            m.director = document.getElementById('edit-director').value;
+            m.age = document.getElementById('edit-age').value;
+            m.poster = document.getElementById('edit-poster').value;
+            m.price = parseInt(document.getElementById('edit-price').value) || m.price;
+
+            renderMovies();
+            closeModal('adminModal');
+        }
+
+        function issueTicket() {
+            const id = parseInt(document.getElementById('free-select').value);
+            const m = moviesData.find(x => x.id === id);
             const row = document.getElementById('free-row').value;
             const seat = document.getElementById('free-seat').value;
 
-            if (!movie) return alert("Выберите фильм");
-
             tg.sendData(JSON.stringify({
                 action: "free_ticket",
-                movie: movie,
-                session: session,
+                movie: m.title,
+                session: m.session,
                 row: row,
                 seat: seat
             }));
             closeModal('adminModal');
         }
 
-        function openBookingModal(movieId) {
-            selectedMovie = moviesData.find(m => m.id === movieId);
+        function openBooking(id) {
+            selectedMovie = moviesData.find(m => m.id === id);
             selectedSeat = null;
+
             document.getElementById('book-title').innerText = selectedMovie.title;
+            document.getElementById('book-meta').innerHTML = `Сеанс: ${selectedMovie.session} | Возраст: ${selectedMovie.age}`;
             document.getElementById('booking-info').innerText = "Выберите место";
 
-            const seatsContainer = document.getElementById('seats-container');
-            seatsContainer.innerHTML = '';
+            const container = document.getElementById('seats-container');
+            container.innerHTML = '';
 
             for (let r = 1; r <= 3; r++) {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'seat-row';
-                
-                const label = document.createElement('div');
-                label.className = 'row-label';
-                label.innerText = `Ряд ${r}`;
-                rowDiv.appendChild(label);
+                const row = document.createElement('div');
+                row.className = 'seat-row';
+                row.innerHTML = `<div class="row-label">Ряд ${r}</div>`;
 
                 for (let s = 1; s <= 5; s++) {
                     const seat = document.createElement('div');
                     seat.className = 'seat';
                     seat.innerText = s;
-                    seat.onclick = () => selectSeat(seat, r, s);
-                    rowDiv.appendChild(seat);
+                    seat.onclick = () => {
+                        document.querySelectorAll('.seat').forEach(x => x.classList.remove('selected'));
+                        seat.classList.add('selected');
+                        selectedSeat = { row: r, seat: s };
+                        document.getElementById('booking-info').innerHTML = `Выбрано: <b>Ряд ${r}, Место ${s}</b>`;
+                    };
+                    row.appendChild(seat);
                 }
-                seatsContainer.appendChild(rowDiv);
+                container.appendChild(row);
             }
 
             document.getElementById('bookingModal').style.display = 'flex';
         }
 
-        function selectSeat(el, row, seatNum) {
-            document.querySelectorAll('.seat').forEach(s => s.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedSeat = { row, seat: seatNum };
-            document.getElementById('booking-info').innerHTML = `Выбрано: Ряд ${row}, Место ${seatNum}`;
-        }
-
         function goToPayment() {
-            if (!selectedSeat) return alert("Выберите место на схеме");
-            
+            if (!selectedSeat) return alert("Выберите место");
             closeModal('bookingModal');
-            
-            const session = document.getElementById('session-time').value;
+
             document.getElementById('payment-summary').innerHTML = `
                 <b>Фильм:</b> ${selectedMovie.title}<br>
-                <b>Сеанс:</b> ${session}<br>
+                <b>Сеанс:</b> ${selectedMovie.session}<br>
                 <b>Место:</b> Ряд ${selectedSeat.row}, Место ${selectedSeat.seat}<br>
-                <b>К оплате:</b> ${selectedMovie.price} ₽
+                <b>Цена:</b> ${selectedMovie.price} ₽
             `;
-            document.getElementById('pay-amount').innerText = `(${selectedMovie.price} ₽)`;
 
             document.getElementById('paymentModal').style.display = 'flex';
         }
 
-        function selectPayment(el, method) {
-            document.querySelectorAll('.pay-card').forEach(c => c.classList.remove('selected'));
+        function selectPay(el, method) {
+            document.querySelectorAll('.pay-card').forEach(x => x.classList.remove('selected'));
             el.classList.add('selected');
             selectedMethod = method;
         }
 
         function processPayment() {
-            const session = document.getElementById('session-time').value;
-
             tg.sendData(JSON.stringify({
                 action: "pay",
                 movie: selectedMovie.title,
-                session: session,
+                session: selectedMovie.session,
                 row: selectedSeat.row,
                 seat: selectedSeat.seat,
                 price: selectedMovie.price,
