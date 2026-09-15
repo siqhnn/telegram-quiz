@@ -494,7 +494,7 @@
             display: none !important;
         }
 
-        /* Управление сеансами в админке */
+        /* Управление объектами в админке */
         .admin-item-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--card-border);
@@ -555,7 +555,7 @@
         <div id="tab-tickets" class="tab-content">
             <div class="section-title">Активные билеты</div>
             <div id="ticketsList">
-                <div class="empty-tickets">У вас пока нет купленных билетов.</div>
+                <div class="empty-tickets">У вас пока нет активных билетов.</div>
             </div>
 
             <div class="section-title" style="margin-top: 30px;">История билетов</div>
@@ -631,10 +631,12 @@
     <div class="modal" id="adminModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="adminFormTitle">Добавить / Изменить</h3>
+                <h3 id="adminFormTitle">Панель управления</h3>
                 <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
             </div>
 
+            <!-- Блок фильма -->
+            <div class="section-title">Добавить / Изменить фильм</div>
             <input type="hidden" id="admEditId">
 
             <div class="input-group">
@@ -672,7 +674,22 @@
                 <input type="number" class="input-control" id="admPrice">
             </div>
 
-            <button class="btn-main" onclick="saveMovieFromAdmin()">Сохранить</button>
+            <button class="btn-main" onclick="saveMovieFromAdmin()">Сохранить фильм</button>
+
+            <!-- Блок создания промокодов -->
+            <div class="section-title" style="margin-top: 25px;">Создать промокод</div>
+            <div class="input-group">
+                <label>Промокод (текст)</label>
+                <input type="text" class="input-control" id="admPromoCode" placeholder="Психолог">
+            </div>
+            <div class="input-group">
+                <label>Скидка (%)</label>
+                <input type="number" class="input-control" id="admPromoDiscount" placeholder="20">
+            </div>
+            <button class="btn-main" onclick="addPromoFromAdmin()">Добавить промокод</button>
+
+            <div class="section-title" style="margin-top: 25px;">Активные промокоды</div>
+            <div id="adminPromosList"></div>
 
             <div class="section-title" style="margin-top: 25px;">Существующие сеансы</div>
             <div id="adminMoviesList"></div>
@@ -688,6 +705,13 @@
         let moviesData = [
             { id: 1, title: "Матрица: Воскрешение", category: "Фильм", status: "В прокате", time: "19:00", price: 400, poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500" },
             { id: 2, title: "Унесённые призраками", category: "Аниме", status: "Анонсировано", time: "21:30", price: 500, poster: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500" }
+        ];
+
+        // Список динамических промокодов
+        let promoCodes = [
+            { code: "психолог", discount: 20 },
+            { code: "pink20", discount: 20 },
+            { code: "sale", discount: 15 }
         ];
 
         let activeTickets = [];
@@ -766,12 +790,11 @@
             const activeContainer = document.getElementById("ticketsList");
             const historyContainer = document.getElementById("ticketsHistoryList");
 
-            // Активные билеты
             if (activeTickets.length === 0) {
                 activeContainer.innerHTML = `<div class="empty-tickets">У вас пока нет активных билетов.</div>`;
             } else {
                 activeContainer.innerHTML = "";
-                activeTickets.forEach((t, i) => {
+                activeTickets.forEach((t) => {
                     const card = document.createElement("div");
                     card.className = "ticket-card";
                     card.innerHTML = `
@@ -787,7 +810,6 @@
                 });
             }
 
-            // История купленных билетов
             if (historyTickets.length === 0) {
                 historyContainer.innerHTML = `<div class="empty-tickets">История заказов пуста.</div>`;
             } else {
@@ -852,10 +874,8 @@
 
         function checkPromoCode(code) {
             const c = code.trim().toLowerCase();
-            if (c === "pink20" || c === "sale" || c === "психолог") {
-                return 20;
-            }
-            return 0;
+            const found = promoCodes.find(p => p.code.toLowerCase() === c);
+            return found ? found.discount : 0;
         }
 
         function applySeatPromo() {
@@ -908,10 +928,11 @@
             }
         }
 
-        // Админка: Управление каталогом
+        // Админка
         function openAdminModal() {
             resetAdminForm();
             renderAdminMoviesList();
+            renderAdminPromosList();
             document.getElementById("adminModal").classList.add("active");
         }
 
@@ -936,6 +957,48 @@
             });
         }
 
+        function renderAdminPromosList() {
+            const list = document.getElementById("adminPromosList");
+            list.innerHTML = "";
+
+            promoCodes.forEach((p, index) => {
+                const card = document.createElement("div");
+                card.className = "admin-item-card";
+                card.innerHTML = `
+                    <div>
+                        <div style="font-weight:600; font-size:13px;">${p.code}</div>
+                        <div style="font-size:11px; color:var(--text-sub);">Скидка: ${p.discount}%</div>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-sm btn-delete" onclick="deletePromo(${index})">Уд.</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function addPromoFromAdmin() {
+            const codeInput = document.getElementById("admPromoCode").value.trim();
+            const discountInput = Number(document.getElementById("admPromoDiscount").value);
+
+            if (!codeInput || !discountInput) {
+                return alert("Заполните промокод и процент скидки");
+            }
+
+            promoCodes.push({ code: codeInput.toLowerCase(), discount: discountInput });
+            document.getElementById("admPromoCode").value = "";
+            document.getElementById("admPromoDiscount").value = "";
+            renderAdminPromosList();
+            alert(`Промокод "${codeInput}" успешно добавлен!`);
+        }
+
+        function deletePromo(index) {
+            if (confirm("Удалить этот промокод?")) {
+                promoCodes.splice(index, 1);
+                renderAdminPromosList();
+            }
+        }
+
         function saveMovieFromAdmin() {
             const editId = document.getElementById("admEditId").value;
             const title = document.getElementById("admTitle").value;
@@ -948,13 +1011,11 @@
             if (!title) return alert("Введите название");
 
             if (editId) {
-                // Редактирование
                 const index = moviesData.findIndex(m => m.id == editId);
                 if (index !== -1) {
                     moviesData[index] = { id: Number(editId), title, category, status, poster, time, price };
                 }
             } else {
-                // Добавление
                 moviesData.push({ id: Date.now(), title, category, status, poster, time, price });
             }
 
