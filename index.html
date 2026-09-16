@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Кинотеатр</title>
+    <title>Кинотеатр Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -16,7 +16,7 @@
             --accent-hover: #e01b6e;
             --pink-glow: rgba(255, 42, 133, 0.35);
             --pink-light: #ff85c0;
-            --glass-bg: rgba(25, 15, 30, 0.75);
+            --glass-bg: rgba(25, 15, 30, 0.85);
             --radius-lg: 20px;
             --radius-md: 12px;
             --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -34,15 +34,15 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 90px;
+            padding-bottom: 95px;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(255, 42, 133, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(255, 133, 192, 0.08) 0%, transparent 40%);
+                radial-gradient(circle at 10% 20%, rgba(255, 42, 133, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(255, 133, 192, 0.1) 0%, transparent 40%);
         }
 
         header {
-            padding: 20px 16px;
+            padding: 18px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -62,8 +62,8 @@
         }
 
         .avatar {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-color), var(--pink-light));
             display: flex;
@@ -71,7 +71,7 @@
             justify-content: center;
             font-weight: bold;
             color: #fff;
-            box-shadow: 0 0 12px var(--pink-glow);
+            box-shadow: 0 0 14px var(--pink-glow);
         }
 
         .user-info h3 {
@@ -101,19 +101,19 @@
         .section-title {
             font-size: 18px;
             font-weight: 700;
-            margin: 16px 0 12px;
+            margin: 18px 0 12px;
             color: #fff;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* Фильтры категорий */
+        /* Категории */
         .category-bar {
             display: flex;
             gap: 8px;
             overflow-x: auto;
             padding-bottom: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             scrollbar-width: none;
         }
 
@@ -122,23 +122,25 @@
         }
 
         .cat-chip {
-            padding: 6px 14px;
+            padding: 8px 16px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-sub);
             white-space: nowrap;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .cat-chip.active {
             background: var(--accent-color);
             color: #fff;
             border-color: var(--pink-light);
-            box-shadow: 0 0 8px var(--pink-glow);
+            box-shadow: 0 0 10px var(--pink-glow);
         }
 
+        /* Карточки фильмов */
         .movies-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -162,7 +164,7 @@
 
         .poster-wrapper {
             width: 100%;
-            height: 200px;
+            height: 210px;
             position: relative;
             background: #1a1020;
         }
@@ -181,7 +183,7 @@
             backdrop-filter: blur(8px);
             padding: 4px 8px;
             border-radius: 8px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             color: var(--pink-light);
             border: 1px solid var(--card-border);
@@ -193,7 +195,7 @@
             left: 8px;
             background: rgba(255, 42, 133, 0.85);
             color: #fff;
-            padding: 3px 7px;
+            padding: 3px 8px;
             border-radius: 6px;
             font-size: 10px;
             font-weight: 700;
@@ -240,7 +242,7 @@
             text-align: center;
         }
 
-        /* Список билетов и история */
+        /* Список билетов */
         .ticket-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -267,7 +269,7 @@
         .empty-tickets {
             text-align: center;
             color: var(--text-sub);
-            margin: 20px 0;
+            margin: 24px 0;
             font-size: 14px;
         }
 
@@ -299,6 +301,7 @@
             border: none;
             cursor: pointer;
             width: 25%;
+            transition: color 0.2s;
         }
 
         .nav-item.active {
@@ -358,14 +361,14 @@
             background: rgba(255, 255, 255, 0.1);
             border: none;
             color: #fff;
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             font-size: 16px;
             cursor: pointer;
         }
 
-        /* Сетка мест */
+        /* Выбор мест */
         .screen-target {
             width: 80%;
             height: 4px;
@@ -399,6 +402,7 @@
             justify-content: center;
             font-size: 11px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .seat.selected {
@@ -406,13 +410,6 @@
             border-color: var(--pink-light);
             box-shadow: 0 0 10px var(--pink-glow);
             color: #fff;
-        }
-
-        .seat.occupied {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: transparent;
-            color: rgba(255, 255, 255, 0.2);
-            cursor: not-allowed;
         }
 
         .btn-main {
@@ -426,6 +423,7 @@
             font-weight: 600;
             cursor: pointer;
             box-shadow: 0 4px 15px var(--pink-glow);
+            transition: opacity 0.2s;
         }
 
         .btn-main:disabled {
@@ -433,12 +431,34 @@
             box-shadow: none;
         }
 
-        .btn-danger {
-            background: linear-gradient(135deg, #ff4d4d, #b30000);
-            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 14px;
         }
 
-        /* Формы и Инпуты */
+        .payment-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .payment-btn:hover, .payment-btn.active {
+            border-color: var(--accent-color);
+            background: rgba(255, 42, 133, 0.12);
+        }
+
+        /* Поля ввода */
         .input-group {
             margin-bottom: 14px;
         }
@@ -494,7 +514,6 @@
             display: none !important;
         }
 
-        /* Управление объектами в админке */
         .admin-item-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--card-border);
@@ -585,7 +604,7 @@
         </button>
     </nav>
 
-    <!-- Модалка Выбора Мест -->
+    <!-- Модалка Выбора Мест и Оплаты -->
     <div class="modal" id="bookingModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -594,6 +613,7 @@
             </div>
             <div class="screen-target"></div>
             <div class="seats-grid" id="seatsGrid"></div>
+            
             <div style="margin-top: 15px;">
                 <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 8px;">Есть промокод?</p>
                 <div class="promo-box">
@@ -601,6 +621,21 @@
                     <button onclick="applySeatPromo()">ОК</button>
                 </div>
             </div>
+
+            <div style="margin-top: 15px;">
+                <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 6px;">Выберите способ оплаты:</p>
+                <div class="payment-options">
+                    <div class="payment-btn active" id="payMethodCbr" onclick="selectPayMethod('cbr')">
+                        <span>Оплата через СБП (CBR Pay)</span>
+                        <span style="font-size:11px; color:var(--pink-light);">Быстро</span>
+                    </div>
+                    <div class="payment-btn" id="payMethodDa" onclick="selectPayMethod('da')">
+                        <span>DonationAlerts</span>
+                        <span style="font-size:11px; color:var(--pink-light);">Донат</span>
+                    </div>
+                </div>
+            </div>
+
             <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <span style="font-size: 12px; color: var(--text-sub);">Итого:</span>
@@ -631,11 +666,10 @@
     <div class="modal" id="adminModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="adminFormTitle">Панель управления</h3>
+                <h3>Панель управления</h3>
                 <button class="close-btn" onclick="closeModal('adminModal')">✕</button>
             </div>
 
-            <!-- Блок фильма -->
             <div class="section-title">Добавить / Изменить фильм</div>
             <input type="hidden" id="admEditId">
 
@@ -653,7 +687,7 @@
                 </select>
             </div>
             <div class="input-group">
-                <label>Статус в плакате</label>
+                <label>Статус плаката</label>
                 <select class="input-control" id="admStatus">
                     <option value="В прокате">В прокате</option>
                     <option value="Анонсировано">Анонсировано</option>
@@ -666,7 +700,7 @@
                 <input type="text" class="input-control" id="admPoster">
             </div>
             <div class="input-group">
-                <label>Время / Сеансы</label>
+                <label>Время сеанса</label>
                 <input type="text" class="input-control" id="admTime" placeholder="18:00, 21:00">
             </div>
             <div class="input-group">
@@ -676,15 +710,14 @@
 
             <button class="btn-main" onclick="saveMovieFromAdmin()">Сохранить фильм</button>
 
-            <!-- Блок создания промокодов -->
             <div class="section-title" style="margin-top: 25px;">Создать промокод</div>
             <div class="input-group">
                 <label>Промокод (текст)</label>
-                <input type="text" class="input-control" id="admPromoCode" placeholder="Психолог">
+                <input type="text" class="input-control" id="admPromoCode" placeholder="например: DISCOUNT50">
             </div>
             <div class="input-group">
                 <label>Скидка (%)</label>
-                <input type="number" class="input-control" id="admPromoDiscount" placeholder="20">
+                <input type="number" class="input-control" id="admPromoDiscount" placeholder="50">
             </div>
             <button class="btn-main" onclick="addPromoFromAdmin()">Добавить промокод</button>
 
@@ -702,20 +735,35 @@
 
         const ADMINS = ["fuckvskrytiye", "polomad"]; 
         
-        let moviesData = [
+        // Ссылки на оплаты
+        const PAY_URLS = {
+            cbr: "https://c2c.cbrpay.ru/BS1I0003J778U5FN8PSPPB6FAIFGQD3L",
+            da: "https://www.donationalerts.com/r/qbyrjf"
+        };
+        let selectedPayMethod = "cbr";
+
+        const defaultMovies = [
             { id: 1, title: "Матрица: Воскрешение", category: "Фильм", status: "В прокате", time: "19:00", price: 400, poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500" },
             { id: 2, title: "Унесённые призраками", category: "Аниме", status: "Анонсировано", time: "21:30", price: 500, poster: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500" }
         ];
 
-        // Список динамических промокодов
-        let promoCodes = [
+        const defaultPromos = [
             { code: "психолог", discount: 20 },
-            { code: "pink20", discount: 20 },
-            { code: "sale", discount: 15 }
+            { code: "pink20", discount: 20 }
         ];
 
-        let activeTickets = [];
-        let historyTickets = [];
+        let moviesData = JSON.parse(localStorage.getItem('cinema_movies_data')) || defaultMovies;
+        let promoCodes = JSON.parse(localStorage.getItem('cinema_promos_data')) || defaultPromos;
+        let activeTickets = JSON.parse(localStorage.getItem('cinema_active_tickets')) || [];
+        let historyTickets = JSON.parse(localStorage.getItem('cinema_history_tickets')) || [];
+
+        function saveAllToStorage() {
+            localStorage.setItem('cinema_movies_data', JSON.stringify(moviesData));
+            localStorage.setItem('cinema_promos_data', JSON.stringify(promoCodes));
+            localStorage.setItem('cinema_active_tickets', JSON.stringify(activeTickets));
+            localStorage.setItem('cinema_history_tickets', JSON.stringify(historyTickets));
+        }
+
         let selectedMovie = null;
         let selectedSeat = null;
         let currentDiscount = 0;
@@ -863,6 +911,13 @@
             updateTotalPrice();
         }
 
+        function selectPayMethod(method) {
+            selectedPayMethod = method;
+            document.querySelectorAll('.payment-btn').forEach(el => el.classList.remove('active'));
+            if(method === 'cbr') document.getElementById('payMethodCbr').classList.add('active');
+            if(method === 'da') document.getElementById('payMethodDa').classList.add('active');
+        }
+
         function updateTotalPrice() {
             if (!selectedMovie) return;
             let finalPrice = selectedMovie.price;
@@ -883,7 +938,7 @@
             const discount = checkPromoCode(val);
             if (discount > 0) {
                 currentDiscount = discount;
-                alert(`Промокод применен! Скидка ${discount}%`);
+                alert(`Промокод применён! Скидка ${discount}%`);
             } else {
                 alert("Недействительный промокод");
             }
@@ -914,21 +969,28 @@
                 time: selectedMovie.time,
                 row: selectedSeat.row,
                 seat: selectedSeat.seat,
-                price: priceText
+                price: priceText,
+                payMethod: selectedPayMethod
             };
 
             activeTickets.push(ticketData);
             historyTickets.push(ticketData);
+            saveAllToStorage();
 
-            if (tg) {
-                tg.sendData(JSON.stringify(ticketData));
+            const paymentUrl = PAY_URLS[selectedPayMethod];
+
+            // Открытие ссылки оплаты
+            if (tg?.openLink) {
+                tg.openLink(paymentUrl);
             } else {
-                alert(`Успешно забронировано: ${ticketData.movie}, Ряд ${ticketData.row}, Место ${ticketData.seat}`);
-                closeModal("bookingModal");
+                window.open(paymentUrl, '_blank');
             }
+
+            closeModal("bookingModal");
+            switchTab('tickets');
         }
 
-        // Админка
+        // Управление в Админке
         function openAdminModal() {
             resetAdminForm();
             renderAdminMoviesList();
@@ -986,15 +1048,17 @@
             }
 
             promoCodes.push({ code: codeInput.toLowerCase(), discount: discountInput });
+            saveAllToStorage();
             document.getElementById("admPromoCode").value = "";
             document.getElementById("admPromoDiscount").value = "";
             renderAdminPromosList();
-            alert(`Промокод "${codeInput}" успешно добавлен!`);
+            alert(`Промокод "${codeInput}" сохранён!`);
         }
 
         function deletePromo(index) {
             if (confirm("Удалить этот промокод?")) {
                 promoCodes.splice(index, 1);
+                saveAllToStorage();
                 renderAdminPromosList();
             }
         }
@@ -1008,7 +1072,7 @@
             const time = document.getElementById("admTime").value || "20:00";
             const price = Number(document.getElementById("admPrice").value) || 350;
 
-            if (!title) return alert("Введите название");
+            if (!title) return alert("Введите название фильма");
 
             if (editId) {
                 const index = moviesData.findIndex(m => m.id == editId);
@@ -1019,9 +1083,11 @@
                 moviesData.push({ id: Date.now(), title, category, status, poster, time, price });
             }
 
+            saveAllToStorage();
             renderMovies();
             renderAdminMoviesList();
             resetAdminForm();
+            alert("Фильм успешно сохранён!");
         }
 
         function editMovie(id) {
@@ -1040,6 +1106,7 @@
         function deleteMovie(id) {
             if (confirm("Удалить этот сеанс?")) {
                 moviesData = moviesData.filter(m => m.id !== id);
+                saveAllToStorage();
                 renderMovies();
                 renderAdminMoviesList();
             }
@@ -1061,7 +1128,7 @@
             document.getElementById(id).classList.remove("active");
         }
 
-        // Инициализация
+        // Запуск
         initUser();
         renderMovies();
     </script>
