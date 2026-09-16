@@ -107,7 +107,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Категории */
         .category-bar {
             display: flex;
             gap: 8px;
@@ -140,7 +139,6 @@
             box-shadow: 0 0 10px var(--pink-glow);
         }
 
-        /* Карточки фильмов */
         .movies-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -242,7 +240,6 @@
             text-align: center;
         }
 
-        /* Список билетов */
         .ticket-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -273,7 +270,6 @@
             font-size: 14px;
         }
 
-        /* Навигация снизу */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -314,7 +310,6 @@
             fill: currentColor;
         }
 
-        /* Модальные окна */
         .modal {
             position: fixed;
             top: 0;
@@ -368,7 +363,6 @@
             cursor: pointer;
         }
 
-        /* Выбор мест */
         .screen-target {
             width: 80%;
             height: 4px;
@@ -453,12 +447,11 @@
             transition: border-color 0.2s, background 0.2s;
         }
 
-        .payment-btn:hover, .payment-btn.active {
+        .payment-btn.active {
             border-color: var(--accent-color);
             background: rgba(255, 42, 133, 0.12);
         }
 
-        /* Поля ввода */
         .input-group {
             margin-bottom: 14px;
         }
@@ -556,7 +549,6 @@
     </header>
 
     <div class="container">
-        <!-- Вкладка Афиша -->
         <div id="tab-afisha" class="tab-content active">
             <div class="category-bar">
                 <div class="cat-chip active" onclick="filterCategory('all', this)">Все</div>
@@ -570,7 +562,6 @@
             <div class="movies-grid" id="moviesGrid"></div>
         </div>
 
-        <!-- Вкладка Билеты и История -->
         <div id="tab-tickets" class="tab-content">
             <div class="section-title">Активные билеты</div>
             <div id="ticketsList">
@@ -584,7 +575,6 @@
         </div>
     </div>
 
-    <!-- Навигация -->
     <nav class="bottom-nav">
         <button class="nav-item active" id="btn-tab-afisha" onclick="switchTab('afisha')">
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4h-2l2 4H9L7 4H5L3 8v12h18V4h-3z"/></svg>
@@ -604,7 +594,6 @@
         </button>
     </nav>
 
-    <!-- Модалка Выбора Мест и Оплаты -->
     <div class="modal" id="bookingModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -646,7 +635,6 @@
         </div>
     </div>
 
-    <!-- Модалка Промокодов -->
     <div class="modal" id="promoModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -662,7 +650,6 @@
         </div>
     </div>
 
-    <!-- Модалка Админки -->
     <div class="modal" id="adminModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -735,7 +722,6 @@
 
         const ADMINS = ["fuckvskrytiye", "polomad"]; 
         
-        // Ссылки на оплаты
         const PAY_URLS = {
             cbr: "https://c2c.cbrpay.ru/BS1I0003J778U5FN8PSPPB6FAIFGQD3L",
             da: "https://www.donationalerts.com/r/qbyrjf"
@@ -847,7 +833,7 @@
                     card.className = "ticket-card";
                     card.innerHTML = `
                         <div>
-                            <div class="ticket-title">${t.movie}</div>
+                            <div class="ticket-title">${t.movie} (${t.status || 'На проверке'})</div>
                             <div class="ticket-details">Сеанс: ${t.time} | Ряд: ${t.row}, Место: ${t.seat}</div>
                         </div>
                         <div style="text-align:right;">
@@ -868,7 +854,7 @@
                     card.style.opacity = "0.7";
                     card.innerHTML = `
                         <div>
-                            <div class="ticket-title">${t.movie} (Оплачено)</div>
+                            <div class="ticket-title">${t.movie} (Заявка)</div>
                             <div class="ticket-details">Сеанс: ${t.time} | Ряд: ${t.row}, Место: ${t.seat}</div>
                         </div>
                         <div style="font-weight:700; color:var(--text-sub);">${t.price}</div>
@@ -965,32 +951,38 @@
 
             const priceText = document.getElementById("totalPrice").innerText;
             const ticketData = {
+                action: "request_payment",
                 movie: selectedMovie.title,
                 time: selectedMovie.time,
                 row: selectedSeat.row,
                 seat: selectedSeat.seat,
                 price: priceText,
-                payMethod: selectedPayMethod
+                payMethod: selectedPayMethod === 'cbr' ? 'СБП (CBR Pay)' : 'DonationAlerts'
             };
 
-            activeTickets.push(ticketData);
-            historyTickets.push(ticketData);
+            // Добавляем в историю как "На проверке"
+            const localTicket = { ...ticketData, status: "Ожидает подтверждения" };
+            activeTickets.push(localTicket);
+            historyTickets.push(localTicket);
             saveAllToStorage();
 
             const paymentUrl = PAY_URLS[selectedPayMethod];
 
-            // Открытие ссылки оплаты
+            // Переход к оплате
             if (tg?.openLink) {
                 tg.openLink(paymentUrl);
             } else {
                 window.open(paymentUrl, '_blank');
             }
 
-            closeModal("bookingModal");
-            switchTab('tickets');
+            if (tg) {
+                tg.sendData(JSON.stringify(ticketData));
+            } else {
+                alert(`Заявка создана! Оплатите по ссылке: ${paymentUrl}`);
+                closeModal("bookingModal");
+            }
         }
 
-        // Управление в Админке
         function openAdminModal() {
             resetAdminForm();
             renderAdminMoviesList();
@@ -1128,7 +1120,6 @@
             document.getElementById(id).classList.remove("active");
         }
 
-        // Запуск
         initUser();
         renderMovies();
     </script>
