@@ -240,29 +240,6 @@
             text-align: center;
         }
 
-        .ticket-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 14px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .ticket-title {
-            font-weight: 600;
-            font-size: 15px;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .ticket-details {
-            font-size: 12px;
-            color: var(--text-sub);
-        }
-
         .empty-tickets {
             text-align: center;
             color: var(--text-sub);
@@ -567,7 +544,7 @@
         <div id="tab-tickets" class="tab-content">
             <div class="section-title">Подтверждённые билеты</div>
             <div id="ticketsList">
-                <div class="empty-tickets">У вас пока нет активных билетов. Все купленные билеты появятся здесь после подтверждения оплаты.</div>
+                <div class="empty-tickets">У вас пока нет активных билетов. Все купленные билеты появятся здесь после подтверждения оплаты администратором.</div>
             </div>
         </div>
     </div>
@@ -688,8 +665,8 @@
                 <input type="text" class="input-control" id="admPoster">
             </div>
             <div class="input-group">
-                <label>Время сеанса</label>
-                <input type="text" class="input-control" id="admTime" placeholder="18:00, 21:00">
+                <label>Дата и время сеанса</label>
+                <input type="text" class="input-control" id="admTime" placeholder="например: 25.09 19:00">
             </div>
             <div class="input-group">
                 <label>Цена билета (₽)</label>
@@ -730,8 +707,8 @@
         let selectedPayMethod = "cbr";
 
         const defaultMovies = [
-            { id: 1, title: "Матрица: Воскрешение", category: "Фильм", status: "В прокате", time: "19:00", price: 400, poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500" },
-            { id: 2, title: "Унесённые призраками", category: "Аниме", status: "Анонсировано", time: "21:30", price: 500, poster: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500" }
+            { id: 1, title: "Матрица: Воскрешение", category: "Фильм", status: "В прокате", time: "25.09 19:00", price: 400, poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500" },
+            { id: 2, title: "Унесённые призраками", category: "Аниме", status: "Анонсировано", time: "26.09 21:30", price: 500, poster: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=500" }
         ];
 
         const defaultPromos = [
@@ -816,7 +793,7 @@
         function openBooking(movie) {
             selectedMovie = movie;
             selectedSeat = null;
-            document.getElementById("modalMovieTitle").innerText = movie.title;
+            document.getElementById("modalMovieTitle").innerText = `${movie.title} (${movie.time})`;
             
             const grid = document.getElementById("seatsGrid");
             grid.innerHTML = "";
@@ -911,14 +888,12 @@
 
             const paymentUrl = PAY_URLS[selectedPayMethod];
 
-            // 1. Перенаправляем пользователя к оплате
             if (tg?.openLink) {
                 tg.openLink(paymentUrl);
             } else {
                 window.open(paymentUrl, '_blank');
             }
 
-            // 2. Отправляем заявку боту (без добавления в локальные билеты!)
             if (tg) {
                 tg.sendData(JSON.stringify(ticketData));
             } else {
@@ -944,7 +919,7 @@
                 card.className = "admin-item-card";
                 card.innerHTML = `
                     <div>
-                        <div style="font-weight:600; font-size:13px;">${m.title}</div>
+                        <div style="font-weight:600; font-size:13px;">${m.title} (${m.time})</div>
                         <div style="font-size:11px; color:var(--text-sub);">${m.category} | ${m.status} | ${m.price}₽</div>
                     </div>
                     <div class="admin-actions">
@@ -993,10 +968,16 @@
         }
 
         function deletePromo(index) {
-            if (confirm("Удалить этот промокод?")) {
+            const performDelete = () => {
                 promoCodes.splice(index, 1);
                 saveAllToStorage();
                 renderAdminPromosList();
+            };
+
+            if (tg?.showConfirm) {
+                tg.showConfirm("Удалить этот промокод?", (ok) => { if (ok) performDelete(); });
+            } else if (confirm("Удалить этот промокод?")) {
+                performDelete();
             }
         }
 
@@ -1006,7 +987,7 @@
             const category = document.getElementById("admCategory").value;
             const status = document.getElementById("admStatus").value;
             const poster = document.getElementById("admPoster").value || "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500";
-            const time = document.getElementById("admTime").value || "20:00";
+            const time = document.getElementById("admTime").value || "25.09 19:00";
             const price = Number(document.getElementById("admPrice").value) || 350;
 
             if (!title) return alert("Введите название фильма");
@@ -1038,14 +1019,23 @@
             document.getElementById("admPoster").value = movie.poster;
             document.getElementById("admTime").value = movie.time;
             document.getElementById("admPrice").value = movie.price;
+
+            const modalBody = document.querySelector("#adminModal .modal-content");
+            if (modalBody) modalBody.scrollTop = 0;
         }
 
         function deleteMovie(id) {
-            if (confirm("Удалить этот сеанс?")) {
+            const performDelete = () => {
                 moviesData = moviesData.filter(m => m.id !== id);
                 saveAllToStorage();
                 renderMovies();
                 renderAdminMoviesList();
+            };
+
+            if (tg?.showConfirm) {
+                tg.showConfirm("Удалить этот сеанс?", (ok) => { if (ok) performDelete(); });
+            } else if (confirm("Удалить этот сеанс?")) {
+                performDelete();
             }
         }
 
